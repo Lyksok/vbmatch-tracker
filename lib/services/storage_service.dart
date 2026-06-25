@@ -86,4 +86,63 @@ class StorageService {
     matches.sort((a, b) => b.date.compareTo(a.date));
     return matches;
   }
+
+  static const String _teamsFile = 'teams.json';
+  static const String _playersFile = 'players.json';
+
+  // Save teams list
+  Future<void> saveTeams(List<Team> teams) async {
+    try {
+      final dir = await _localDir;
+      final file = File('${dir.path}/$_teamsFile');
+      final jsonStr = jsonEncode(teams.map((t) => t.toMap()).toList());
+      await file.writeAsString(jsonStr);
+    } catch (e) {
+      print('Error saving teams: $e');
+    }
+  }
+
+  // Load teams list
+  Future<List<Team>> loadTeams() async {
+    try {
+      final dir = await _localDir;
+      final file = File('${dir.path}/$_teamsFile');
+      if (await file.exists()) {
+        final jsonStr = await file.readAsString();
+        final List list = jsonDecode(jsonStr);
+        return list.map((t) => Team.fromMap(t)).toList();
+      }
+    } catch (e) {
+      print('Error loading teams: $e');
+    }
+    return [];
+  }
+
+  // Save global players list
+  Future<void> saveGlobalPlayers(List<Player> players) async {
+    try {
+      final dir = await _localDir;
+      final file = File('${dir.path}/$_playersFile');
+      final jsonStr = jsonEncode(players.map((p) => p.toMap()).toList());
+      await file.writeAsString(jsonStr);
+    } catch (e) {
+      print('Error saving global players: $e');
+    }
+  }
+
+  // Load global players list
+  Future<List<Player>> loadGlobalPlayers() async {
+    try {
+      final dir = await _localDir;
+      final file = File('${dir.path}/$_playersFile');
+      if (await file.exists()) {
+        final jsonStr = await file.readAsString();
+        final List list = jsonDecode(jsonStr);
+        return list.map((p) => Player.fromMap(p)).toList();
+      }
+    } catch (e) {
+      print('Error loading global players: $e');
+    }
+    return [];
+  }
 }

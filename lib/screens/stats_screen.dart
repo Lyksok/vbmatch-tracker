@@ -103,7 +103,7 @@ class StatsScreen extends StatelessWidget {
     }
 
     return _PlayerStats(
-      player: Player(id: 'team', name: 'Équipe / Non spécifié', number: 0),
+      player: Player(id: 'team', name: 'Collectif / Non spécifié', number: 0),
       aces: aces,
       attacks: attacks,
       blocks: blocks,
@@ -353,7 +353,7 @@ class StatsScreen extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Earned points Breakdown (US)
-        _buildSectionHeader('Détail des points marqués par notre équipe (${totalUs} pts)'),
+        _buildSectionHeader('Détail des points marqués par notre collectif (${totalUs} pts)'),
         Card(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
@@ -519,7 +519,7 @@ class StatsScreen extends StatelessWidget {
                   DataRow(
                     color: MaterialStateProperty.all(const Color(0xFFF8FAFC)),
                     cells: [
-                      const DataCell(Text('Équipe (Non spécifié)', style: TextStyle(fontStyle: FontStyle.italic))),
+                      const DataCell(Text('Collectif (Non spécifié)', style: TextStyle(fontStyle: FontStyle.italic))),
                       DataCell(Text('${teamStats.totalPoints}')),
                       DataCell(Text('${teamStats.aces}')),
                       DataCell(Text('${teamStats.attacks}')),

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../models/match_model.dart';
 import '../services/storage_service.dart';
 import 'match_setup_screen.dart';
 import 'match_screen.dart';
 import 'stats_screen.dart';
+import 'teams_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -17,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
   List<VolleyballMatch> _matches = [];
   bool _isLoading = true;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -85,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Light background Slate 100
       appBar: AppBar(
@@ -102,35 +102,66 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white,
         elevation: 4,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip: 'Rafraîchir',
-            onPressed: _loadMatches,
-          )
+          if (_currentIndex == 0)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Rafraîchir',
+              onPressed: _loadMatches,
+            )
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B)))
-          : _matches.isEmpty
-              ? _buildEmptyState()
-              : _buildMatchList(),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const MatchSetupScreen()),
-          );
-          if (result == true) {
+      body: _currentIndex == 0
+          ? (_isLoading
+              ? const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B)))
+              : _matches.isEmpty
+                  ? _buildEmptyState()
+                  : _buildMatchList())
+          : const TeamsTab(),
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton.extended(
+              heroTag: 'new_match_fab',
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MatchSetupScreen()),
+                );
+                if (result == true) {
+                  _loadMatches();
+                }
+              },
+              backgroundColor: const Color(0xFFF59E0B), // Volleyball Orange/Amber
+              foregroundColor: Colors.white,
+              icon: const Icon(Icons.add, size: 24),
+              label: const Text(
+                'NOUVEAU MATCH',
+                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+              ),
+            )
+          : null,
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index == 0) {
             _loadMatches();
           }
         },
-        backgroundColor: const Color(0xFFF59E0B), // Volleyball Orange/Amber
-        foregroundColor: Colors.white,
-        icon: const Icon(Icons.add, size: 24),
-        label: const Text(
-          'NOUVEAU MATCH',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
-        ),
+        selectedItemColor: const Color(0xFF3B82F6),
+        unselectedItemColor: const Color(0xFF64748B),
+        backgroundColor: Colors.white,
+        elevation: 8,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sports_volleyball),
+            label: 'Matchs',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.group),
+            label: 'Collectifs',
+          ),
+        ],
       ),
     );
   }
@@ -305,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Équipe : ${match.teamName}',
+                          'Collectif : ${match.teamName}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,

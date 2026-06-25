@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 enum PointAction {
   ace('Ace (Service Gagnant)', true),
@@ -145,6 +144,7 @@ class VolleyballMatch {
   final String id;
   String name;
   String teamName; // User's team name
+  String? teamId; // Associated team ID
   final List<Player> players;
   final List<VolleyballSet> sets;
   int winningSetsNeeded; // 2 (match in 3 sets) or 3 (match in 5 sets)
@@ -156,6 +156,7 @@ class VolleyballMatch {
     required this.id,
     required this.name,
     this.teamName = 'Mon Équipe',
+    this.teamId,
     required this.players,
     List<VolleyballSet>? sets,
     this.winningSetsNeeded = 3,
@@ -170,6 +171,7 @@ class VolleyballMatch {
       'id': id,
       'name': name,
       'teamName': teamName,
+      'teamId': teamId,
       'players': players.map((p) => p.toMap()).toList(),
       'sets': sets.map((s) => s.toMap()).toList(),
       'winningSetsNeeded': winningSetsNeeded,
@@ -184,6 +186,7 @@ class VolleyballMatch {
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       teamName: map['teamName'] ?? 'Mon Équipe',
+      teamId: map['teamId'],
       players: (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ?? [],
       winningSetsNeeded: map['winningSetsNeeded'] ?? 3,
       isFinished: map['isFinished'] ?? false,
@@ -298,5 +301,37 @@ class VolleyballMatch {
       return 'us';
     }
     return currentSet.events.last.winningTeam;
+  }
+}
+
+class Team {
+  final String id;
+  final String name;
+  final String type; // '3x3', '4x4', '6x6'
+  final List<Player> players;
+
+  Team({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.players,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'type': type,
+      'players': players.map((p) => p.toMap()).toList(),
+    };
+  }
+
+  factory Team.fromMap(Map<String, dynamic> map) {
+    return Team(
+      id: map['id'] ?? '',
+      name: map['name'] ?? '',
+      type: map['type'] ?? '6x6',
+      players: (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ?? [],
+    );
   }
 }

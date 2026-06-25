@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/match_model.dart';
 import '../services/storage_service.dart';
 import 'stats_screen.dart';
+import 'point_logging_screen.dart';
 
 class MatchScreen extends StatefulWidget {
   final VolleyballMatch match;
@@ -33,29 +34,68 @@ class _MatchScreenState extends State<MatchScreen> {
       });
       _saveMatch();
     } else {
-      // Show bottom sheet to log action and player
-      _showPointLoggingSheet(winningTeam);
+      // Show full screen page to log action and player
+      _showPointLoggingScreen(winningTeam);
     }
   }
 
-  void _showPointLoggingSheet(String winningTeam) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext bc) {
-        return _PointLoggingSheet(
+  Future<void> _showPointLoggingScreen(String winningTeam) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PointLoggingScreen(
           winningTeam: winningTeam,
+          teamName: _match.teamName,
           players: _match.players,
-          onCompleted: (action, playerId) {
-            setState(() {
-              _match.addPoint(winningTeam, action, playerId);
-            });
-            _saveMatch();
-          },
-        );
-      },
+        ),
+      ),
     );
+
+    if (result != null) {
+      setState(() {
+        _match.addPoint(winningTeam, result.action, result.playerId);
+      });
+      _saveMatch();
+    }
+  }
+
+  Future<void> _renameMatch() async {
+    final controller = TextEditingController(text: _match.name);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Modifier l\'intitulé du match'),
+        content: TextField(
+          controller: controller,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Nom du match',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('ANNULER', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('ENREGISTRER'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.isNotEmpty) {
+      setState(() {
+        _match.name = newName;
+      });
+      await _saveMatch();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nom du match mis à jour')),
+      );
+    }
   }
 
   void _handleUndo() {
@@ -113,7 +153,26 @@ class _MatchScreenState extends State<MatchScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFF0F172A), // Dark Background for high contrast scoring
         appBar: AppBar(
-          title: Text(_match.name),
+          title: InkWell(
+            onTap: _renameMatch,
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      _match.name,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  const Icon(Icons.edit, size: 16, color: Colors.white70),
+                ],
+              ),
+            ),
+          ),
           backgroundColor: const Color(0xFF1E293B),
           foregroundColor: Colors.white,
           leading: IconButton(
@@ -510,7 +569,7 @@ class _MatchScreenState extends State<MatchScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: const Text(
-                'Astuce : Tapez sur le score d\'une équipe pour ajouter un point.',
+                'Astuce : Tapez sur le score d\'un collectif pour ajouter un point.',
                 style: TextStyle(color: Color(0xFF64748B), fontSize: 11, fontStyle: FontStyle.italic),
               ),
             ),
@@ -520,220 +579,4 @@ class _MatchScreenState extends State<MatchScreen> {
   }
 }
 
-class _PointLoggingSheet extends StatefulWidget {
-  final String winningTeam;
-  final List<Player> players;
-  final Function(PointAction, String?) onCompleted;
 
-  const _PointLoggingSheet({
-    Key? key,
-    required this.winningTeam,
-    required this.players,
-    required this.onCompleted,
-  }) : super(key: key);
-
-  @override
-  State<_PointLoggingSheet> createState() => _PointLoggingSheetState();
-}
-
-class _PointLoggingSheetState extends State<_PointLoggingSheet> {
-  PointAction? _selectedAction;
-  String? _selectedPlayerId;
-
-  // Track if we need to show player selection
-  bool get _requiresPlayer {
-    if (_selectedAction == null) return false;
-    // Opponent error or Opponent winner don't require player attribution
-    if (_selectedAction == PointAction.erreurAdverse || _selectedAction == PointAction.pointAdversaire) {
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isUs = widget.winningTeam == 'us';
-
-    // Filter actions depending on who won the point
-    final availableActions = isUs
-        ? [PointAction.ace, PointAction.attaque, PointAction.contre, PointAction.erreurAdverse]
-        : [
-            PointAction.fauteService,
-            PointAction.fauteAttaque,
-            PointAction.erreurReception,
-            PointAction.fauteFiletAutre,
-            PointAction.pointAdversaire
-          ];
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E293B),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Sheet Header
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFF475569),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                isUs ? 'Point pour vous ! 🎉' : 'Point adverse 🏐',
-                style: TextStyle(
-                  color: isUs ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close, color: Colors.white70),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Step 1: Action Selection
-          const Text(
-            'Comment s\'est terminé le point ?',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: availableActions.map<Widget>((action) {
-              final isSelected = _selectedAction == action;
-              return ChoiceChip(
-                label: Text(action.label),
-                selected: isSelected,
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedAction = selected ? action : null;
-                    _selectedPlayerId = null; // Reset player if action changed
-                  });
-
-                  // If action doesn't require player selection, complete immediately
-                  if (selected && !_requiresPlayer) {
-                    widget.onCompleted(action, null);
-                    Navigator.pop(context);
-                  }
-                },
-                selectedColor: const Color(0xFF2563EB),
-                labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
-                ),
-                checkmarkColor: Colors.white,
-              );
-            }).toList(),
-          ),
-
-          // Step 2: Player Selection (only if required and action selected)
-          if (_requiresPlayer && widget.players.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            Text(
-              _selectedAction == PointAction.ace ||
-                      _selectedAction == PointAction.attaque ||
-                      _selectedAction == PointAction.contre
-                  ? 'Quel joueur a marqué ?'
-                  : 'Quel joueur a fait la faute ?',
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              constraints: const BoxConstraints(maxHeight: 180),
-              child: SingleChildScrollView(
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    // Team Option
-                    ChoiceChip(
-                      avatar: const CircleAvatar(
-                        backgroundColor: Colors.transparent,
-                        child: Icon(Icons.people, size: 14, color: Colors.black54),
-                      ),
-                      label: const Text('L\'Équipe (Non spécifié)'),
-                      selected: _selectedPlayerId == 'team',
-                      onSelected: (selected) {
-                        if (selected) {
-                          widget.onCompleted(_selectedAction!, null);
-                          Navigator.pop(context);
-                        }
-                      },
-                    ),
-                    // Specific Players
-                    ...widget.players.map<Widget>((player) {
-                      final isSelected = _selectedPlayerId == player.id;
-                      return ChoiceChip(
-                        avatar: CircleAvatar(
-                          backgroundColor: isSelected ? Colors.white30 : const Color(0xFFEFF6FF),
-                          foregroundColor: isSelected ? Colors.white : const Color(0xFF1D4ED8),
-                          child: Text(player.number.toString(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                        ),
-                        label: Text(player.name),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            widget.onCompleted(_selectedAction!, player.id);
-                            Navigator.pop(context);
-                          }
-                        },
-                        selectedColor: const Color(0xFFF59E0B),
-                        labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                        ),
-                        checkmarkColor: Colors.white,
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
-            ),
-          ] else if (_requiresPlayer && widget.players.isEmpty) ...[
-            const SizedBox(height: 24),
-            const Text(
-              'Aucun joueur configuré dans l\'équipe. Le point sera attribué à l\'équipe.',
-              style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13, fontStyle: FontStyle.italic),
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  widget.onCompleted(_selectedAction!, null);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                ),
-                child: const Text('Valider pour l\'Équipe'),
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-        ],
-      ),
-    );
-  }
-}

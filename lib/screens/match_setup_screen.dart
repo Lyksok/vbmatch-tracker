@@ -1,11 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import '../models/match_model.dart';
 import '../services/storage_service.dart';
 import 'match_screen.dart';
+import 'team_management_screen.dart';
 
 class MatchSetupScreen extends StatefulWidget {
   const MatchSetupScreen({Key? key}) : super(key: key);
@@ -19,13 +17,18 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _matchNameController = TextEditingController();
-  final TextEditingController _teamNameController = TextEditingController(text: 'Mon Équipe');
-  final TextEditingController _playerNameController = TextEditingController();
-  final TextEditingController _playerNumberController = TextEditingController();
+  final TextEditingController _teamNameController = TextEditingController();
+
+  List<Team> _allTeams = [];
+  Team? _selectedTeam;
+  bool _isLoading = true;
 
   int _winningSetsNeeded = 3; // Default to 3 sets to win (best of 5)
   bool _ignoreStats = false;
-  final List<Player> _players = [];
+
+  // Track match-specific customization for selected team
+  final Map<String, int> _playerCustomNumbers = {}; // playerId -> customNumber
+  final Map<String, bool> _playerAbsentees = {}; // playerId -> isAbsent
 
   @override
   void initState() {
@@ -33,116 +36,38 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
     // Pre-fill match name with current date
     final now = DateTime.now();
     _matchNameController.text = 'Match du ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
-    _loadLastSavedTeam();
+    _loadTeams();
   }
 
   @override
   void dispose() {
     _matchNameController.dispose();
     _teamNameController.dispose();
-    _playerNameController.dispose();
-    _playerNumberController.dispose();
     super.dispose();
   }
 
-  // Load the last saved squad to avoid re-typing
-  Future<void> _loadLastSavedTeam() async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/last_team.json');
-      if (await file.exists()) {
-        final jsonStr = await file.readAsString();
-        final Map<String, dynamic> data = jsonDecode(jsonStr);
-        if (data['teamName'] != null) {
-          _teamNameController.text = data['teamName'];
-        }
-        if (data['players'] != null) {
-          final List playersList = data['players'];
-          setState(() {
-            _players.clear();
-            for (var p in playersList) {
-              _players.add(Player.fromMap(p));
-            }
-          });
-        }
-      }
-    } catch (e) {
-      print('Error loading last team: $e');
-    }
-  }
-
-  // Save the squad for future matches
-  Future<void> _saveLastTeam() async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/last_team.json');
-      final data = {
-        'teamName': _teamNameController.text,
-        'players': _players.map((p) => p.toMap()).toList(),
-      };
-      await file.writeAsString(jsonEncode(data));
-    } catch (e) {
-      print('Error saving last team: $e');
-    }
-  }
-
-  void _addPlayer() {
-    final name = _playerNameController.text.trim();
-    final numberStr = _playerNumberController.text.trim();
-
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Le nom du joueur ne peut pas être vide')),
-      );
-      return;
-    }
-
-    final number = int.tryParse(numberStr);
-    if (number == null || number < 1 || number > 99) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Le numéro doit être un entier entre 1 et 99')),
-      );
-      return;
-    }
-
-    // Check if number is already taken
-    if (_players.any((p) => p.number == number)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Le numéro $number est déjà utilisé par un autre joueur')),
-      );
-      return;
-    }
-
+  Future<void> _loadTeams() async {
+    setState(() => _isLoading = true);
+    final teams = await _storageService.loadTeams();
     setState(() {
-      _players.add(Player(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: name,
-        number: number,
-      ));
-      // Sort players by number
-      _players.sort((a, b) => a.number.compareTo(b.number));
-      _playerNameController.clear();
-      _playerNumberController.clear();
+      _allTeams = teams;
+      _isLoading = false;
     });
   }
 
-  void _removePlayer(String id) {
+  void _onTeamSelected(Team? team) {
     setState(() {
-      _players.removeWhere((p) => p.id == id);
-    });
-  }
-
-  void _loadQuickTeam() {
-    setState(() {
-      _players.clear();
-      final names = ['Lucas', 'Thomas', 'Hugo', 'Arthur', 'Maxime', 'Julien'];
-      final numbers = [4, 7, 9, 10, 12, 18];
-      for (int i = 0; i < names.length; i++) {
-        _players.add(Player(
-          id: 'quick_${i}_${DateTime.now().millisecondsSinceEpoch}',
-          name: names[i],
-          number: numbers[i],
-        ));
+      _selectedTeam = team;
+      if (team != null) {
+        _teamNameController.text = team.name;
+        _playerCustomNumbers.clear();
+        _playerAbsentees.clear();
+        for (var p in team.players) {
+          _playerCustomNumbers[p.id] = p.number;
+          _playerAbsentees[p.id] = false; // present by default
+        }
+      } else {
+        _teamNameController.clear();
       }
     });
   }
@@ -152,29 +77,72 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
       return;
     }
 
-    if (_players.isEmpty) {
+    if (_selectedTeam == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Veuillez ajouter au moins un joueur pour pouvoir saisir des statistiques.'),
-          backgroundColor: Colors.amber,
+          content: Text('Veuillez sélectionner un collectif.'),
+          backgroundColor: Colors.redAccent,
         ),
       );
+      return;
     }
+
+    // Filter active/present players
+    final presentPlayers = _selectedTeam!.players
+        .where((p) => _playerAbsentees[p.id] == false)
+        .toList();
+
+    // 1. Validate team format active players limit
+    int minRequired = 6;
+    if (_selectedTeam!.type == '3x3') minRequired = 3;
+    if (_selectedTeam!.type == '4x4') minRequired = 4;
+
+    if (presentPlayers.length < minRequired) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Format ${_selectedTeam!.type} : vous devez avoir au moins $minRequired joueur(s) présent(s). Actuellement : ${presentPlayers.length}.',
+          ),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    // 2. Validate jersey number uniqueness for present players
+    final presentNumbers = presentPlayers.map((p) => _playerCustomNumbers[p.id]!).toList();
+    if (presentNumbers.toSet().length != presentNumbers.length) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Erreur : Deux joueurs présents ne peuvent pas avoir le même numéro pour un match.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    // Create match players with their custom numbers for this match
+    final List<Player> matchPlayers = presentPlayers.map((p) {
+      return Player(
+        id: p.id,
+        name: p.name,
+        number: _playerCustomNumbers[p.id]!,
+      );
+    }).toList();
 
     // Create match object
     final match = VolleyballMatch(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       name: _matchNameController.text.trim(),
       teamName: _teamNameController.text.trim(),
-      players: List.from(_players),
+      teamId: _selectedTeam!.id,
+      players: matchPlayers,
       winningSetsNeeded: _winningSetsNeeded,
       ignoreStats: _ignoreStats,
     );
 
     // Save match to storage
     await _storageService.saveMatch(match);
-    // Save team config for next time
-    await _saveLastTeam();
 
     // Navigate to scoring screen and replace setup in navigation stack
     if (mounted) {
@@ -189,12 +157,24 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Nouveau Match 🏐'),
+          backgroundColor: const Color(0xFF0F172A),
+          foregroundColor: Colors.white,
+        ),
+        body: const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B))),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text('Nouveau Match 🏐'),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
+        elevation: 2,
       ),
       body: Form(
         key: _formKey,
@@ -212,6 +192,7 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     TextFormField(
                       controller: _matchNameController,
@@ -228,20 +209,31 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _teamNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nom de votre équipe',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.people),
+                    // Team selection dropdown
+                    if (_allTeams.isEmpty)
+                      _buildNoTeamsCard()
+                    else
+                      DropdownButtonFormField<Team>(
+                        decoration: const InputDecoration(
+                          labelText: 'Sélectionner le collectif',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.group),
+                        ),
+                        value: _selectedTeam,
+                        items: _allTeams.map((team) {
+                          return DropdownMenuItem<Team>(
+                            value: team,
+                            child: Text('${team.name} (${team.type})'),
+                          );
+                        }).toList(),
+                        onChanged: _onTeamSelected,
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Veuillez sélectionner un collectif';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return "Veuillez saisir le nom de l'équipe";
-                        }
-                        return null;
-                      },
-                    ),
                     const SizedBox(height: 20),
                     const Text(
                       'Format de victoire :',
@@ -305,116 +297,121 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Section 2: Players Config
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildSectionHeader('Composition de l\'équipe'),
-                TextButton.icon(
-                  onPressed: _loadQuickTeam,
-                  icon: const Icon(Icons.flash_on, size: 16),
-                  label: const Text('Équipe type'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF3B82F6),
-                    visualDensity: VisualDensity.compact,
+            // Section 2: Team Players list & verification
+            if (_selectedTeam != null && !_ignoreStats) ...[
+              _buildSectionHeader('Composition & Numéros pour ce Match'),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Format de collectif : ${_selectedTeam!.type} (min. ${(_selectedTeam!.type == '3x3' ? 3 : _selectedTeam!.type == '4x4' ? 4 : 6)} joueurs actifs requis)',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.blue.shade800,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      if (_selectedTeam!.players.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Text(
+                            'Ce collectif n\'a aucun joueur. Allez dans l\'onglet Collectifs pour en ajouter.',
+                            style: TextStyle(color: Colors.redAccent, fontStyle: FontStyle.italic),
+                          ),
+                        )
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _selectedTeam!.players.length,
+                          separatorBuilder: (context, index) => const Divider(),
+                          itemBuilder: (context, index) {
+                            final player = _selectedTeam!.players[index];
+                            final isAbsent = _playerAbsentees[player.id] ?? false;
+                            final customNumber = _playerCustomNumbers[player.id] ?? player.number;
+
+                            return Row(
+                              children: [
+                                // Absent/Present Toggle
+                                Switch(
+                                  value: !isAbsent, // Active means PRESENT
+                                  activeColor: const Color(0xFF10B981),
+                                  inactiveThumbColor: Colors.red,
+                                  inactiveTrackColor: Colors.red.shade100,
+                                  onChanged: (present) {
+                                    setState(() {
+                                      _playerAbsentees[player.id] = !present;
+                                    });
+                                  },
+                                ),
+                                const SizedBox(width: 8),
+                                // Player Name
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        player.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                          color: isAbsent ? Colors.grey : const Color(0xFF0F172A),
+                                          decoration: isAbsent ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                      if (isAbsent)
+                                        const Text(
+                                          'Absent',
+                                          style: TextStyle(color: Colors.red, fontSize: 12),
+                                        )
+                                      else
+                                        Text(
+                                          'Numéro par défaut : #${player.number}',
+                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                // Jersey number editing
+                                if (!isAbsent)
+                                  SizedBox(
+                                    width: 80,
+                                    child: TextFormField(
+                                      initialValue: customNumber.toString(),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      decoration: const InputDecoration(
+                                        labelText: 'N°',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                      ),
+                                      onChanged: (val) {
+                                        final num = int.tryParse(val);
+                                        if (num != null) {
+                                          _playerCustomNumbers[player.id] = num;
+                                        }
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            );
+                          },
+                        ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: const BorderSide(color: Color(0xFFE2E8F0)),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Player Add Form
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: TextField(
-                            controller: _playerNumberController,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                            decoration: const InputDecoration(
-                              labelText: 'N°',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          flex: 5,
-                          child: TextField(
-                            controller: _playerNameController,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(
-                              labelText: 'Nom du joueur',
-                              border: OutlineInputBorder(),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          onPressed: _addPlayer,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF3B82F6),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Icon(Icons.add),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // Player List
-                    if (_players.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 24.0),
-                        child: Text(
-                          'Aucun joueur configuré pour le moment.\nAjoutez des joueurs ou utilisez le bouton "Équipe type".',
-                          style: TextStyle(color: Color(0xFF64748B), fontStyle: FontStyle.italic),
-                          textAlign: TextAlign.center,
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _players.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final player = _players[index];
-                          return ListTile(
-                            contentPadding: EdgeInsets.zero,
-                            leading: CircleAvatar(
-                              backgroundColor: const Color(0xFFEFF6FF),
-                              foregroundColor: const Color(0xFF1D4ED8),
-                              child: Text(player.number.toString()),
-                            ),
-                            title: Text(
-                              player.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
-                              onPressed: () => _removePlayer(player.id),
-                            ),
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 32),
+              const SizedBox(height: 24),
+            ],
 
             // Start Match Button
             ElevatedButton(
@@ -434,6 +431,54 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
               ),
             ),
             const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoTeamsCard() {
+    return Card(
+      color: Colors.amber.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.amber.shade300),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 40),
+            const SizedBox(height: 8),
+            const Text(
+              'Aucun collectif disponible',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Vous devez créer au moins un collectif dans l\'onglet Collectifs avant de pouvoir démarrer un match avec des statistiques.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+                );
+                if (result == true) {
+                  _loadTeams();
+                }
+              },
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: const Text('Créer un collectif maintenant'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+            ),
           ],
         ),
       ),
