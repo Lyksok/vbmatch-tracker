@@ -4,7 +4,7 @@ import '../models/match_model.dart';
 
 class StatsScreen extends StatelessWidget {
   final VolleyballMatch match;
-  const StatsScreen({Key? key, required this.match}) : super(key: key);
+  const StatsScreen({super.key, required this.match});
 
   // Helper to compile player stats
   _PlayerStats _calculatePlayerStats(Player player) {
@@ -119,7 +119,8 @@ class StatsScreen extends StatelessWidget {
     int count = 0;
     for (var set in match.sets) {
       for (var event in set.events) {
-        if (event.winningTeam == 'us' && event.action == PointAction.erreurAdverse) {
+        if (event.winningTeam == 'us' &&
+            event.action == PointAction.erreurAdverse) {
           count++;
         }
       }
@@ -132,7 +133,8 @@ class StatsScreen extends StatelessWidget {
     int count = 0;
     for (var set in match.sets) {
       for (var event in set.events) {
-        if (event.winningTeam == 'them' && event.action == PointAction.pointAdversaire) {
+        if (event.winningTeam == 'them' &&
+            event.action == PointAction.pointAdversaire) {
           count++;
         }
       }
@@ -141,26 +143,33 @@ class StatsScreen extends StatelessWidget {
   }
 
   // Generate French CSV data
-  String _generateCSV(List<_PlayerStats> playerStatsList, _PlayerStats teamStats) {
+  String _generateCSV(
+    List<_PlayerStats> playerStatsList,
+    _PlayerStats teamStats,
+  ) {
     final buffer = StringBuffer();
-    
+
     // Headers (using semi-colon for French Excel compatibility)
-    buffer.writeln('Joueur;Numéro;Aces;Attaques Gagnantes;Blocs Gagnants;Total Points Marqués;Fautes de Service;Fautes d\'Attaque;Fautes de Réception;Fautes de Filet/Autres;Total Fautes Commises;Bilan (Points - Fautes)');
+    buffer.writeln(
+      'Joueur;Numéro;Aces;Attaques Gagnantes;Blocs Gagnants;Total Points Marqués;Fautes de Service;Fautes d\'Attaque;Fautes de Réception;Fautes de Filet/Autres;Total Fautes Commises;Bilan (Points - Fautes)',
+    );
 
     // Helper to format a row
     void writeRow(_PlayerStats stats) {
-      buffer.writeln('${stats.player.name};'
-          '${stats.player.id == 'team' ? '' : stats.player.number};'
-          '${stats.aces};'
-          '${stats.attacks};'
-          '${stats.blocks};'
-          '${stats.totalPoints};'
-          '${stats.serveErrors};'
-          '${stats.attackErrors};'
-          '${stats.receptionErrors};'
-          '${stats.otherErrors};'
-          '${stats.totalErrors};'
-          '${stats.netContribution}');
+      buffer.writeln(
+        '${stats.player.name};'
+        '${stats.player.id == 'team' ? '' : stats.player.number};'
+        '${stats.aces};'
+        '${stats.attacks};'
+        '${stats.blocks};'
+        '${stats.totalPoints};'
+        '${stats.serveErrors};'
+        '${stats.attackErrors};'
+        '${stats.receptionErrors};'
+        '${stats.otherErrors};'
+        '${stats.totalErrors};'
+        '${stats.netContribution}',
+      );
     }
 
     // Write players rows
@@ -172,25 +181,53 @@ class StatsScreen extends StatelessWidget {
     writeRow(teamStats);
 
     // Totals calculation
-    int totalAces = playerStatsList.fold(0, (sum, item) => sum + item.aces) + teamStats.aces;
-    int totalAttacks = playerStatsList.fold(0, (sum, item) => sum + item.attacks) + teamStats.attacks;
-    int totalBlocks = playerStatsList.fold(0, (sum, item) => sum + item.blocks) + teamStats.blocks;
-    int totalPoints = playerStatsList.fold(0, (sum, item) => sum + item.totalPoints) + teamStats.totalPoints;
-    int totalServeErrors = playerStatsList.fold(0, (sum, item) => sum + item.serveErrors) + teamStats.serveErrors;
-    int totalAttackErrors = playerStatsList.fold(0, (sum, item) => sum + item.attackErrors) + teamStats.attackErrors;
-    int totalReceptionErrors = playerStatsList.fold(0, (sum, item) => sum + item.receptionErrors) + teamStats.receptionErrors;
-    int totalOtherErrors = playerStatsList.fold(0, (sum, item) => sum + item.otherErrors) + teamStats.otherErrors;
-    int totalErrors = playerStatsList.fold(0, (sum, item) => sum + item.totalErrors) + teamStats.totalErrors;
+    int totalAces =
+        playerStatsList.fold(0, (sum, item) => sum + item.aces) +
+        teamStats.aces;
+    int totalAttacks =
+        playerStatsList.fold(0, (sum, item) => sum + item.attacks) +
+        teamStats.attacks;
+    int totalBlocks =
+        playerStatsList.fold(0, (sum, item) => sum + item.blocks) +
+        teamStats.blocks;
+    int totalPoints =
+        playerStatsList.fold(0, (sum, item) => sum + item.totalPoints) +
+        teamStats.totalPoints;
+    int totalServeErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.serveErrors) +
+        teamStats.serveErrors;
+    int totalAttackErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.attackErrors) +
+        teamStats.attackErrors;
+    int totalReceptionErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.receptionErrors) +
+        teamStats.receptionErrors;
+    int totalOtherErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.otherErrors) +
+        teamStats.otherErrors;
+    int totalErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.totalErrors) +
+        teamStats.totalErrors;
     int netContr = totalPoints - totalErrors;
 
-    buffer.writeln('TOTAL EQUIPE;;$totalAces;$totalAttacks;$totalBlocks;$totalPoints;$totalServeErrors;$totalAttackErrors;$totalReceptionErrors;$totalOtherErrors;$totalErrors;$netContr');
-    buffer.writeln('Erreurs de l\'adversaire (Points offerts);;;;;$_opponentErrors;;;;;;');
-    buffer.writeln('Points directs de l\'adversaire (Subis);;;;;$_opponentWinners;;;;;;');
+    buffer.writeln(
+      'TOTAL EQUIPE;;$totalAces;$totalAttacks;$totalBlocks;$totalPoints;$totalServeErrors;$totalAttackErrors;$totalReceptionErrors;$totalOtherErrors;$totalErrors;$netContr',
+    );
+    buffer.writeln(
+      'Erreurs de l\'adversaire (Points offerts);;;;;$_opponentErrors;;;;;;',
+    );
+    buffer.writeln(
+      'Points directs de l\'adversaire (Subis);;;;;$_opponentWinners;;;;;;',
+    );
 
     return buffer.toString();
   }
 
-  void _exportCSV(BuildContext context, List<_PlayerStats> playerStatsList, _PlayerStats teamStats) {
+  void _exportCSV(
+    BuildContext context,
+    List<_PlayerStats> playerStatsList,
+    _PlayerStats teamStats,
+  ) {
     final csv = _generateCSV(playerStatsList, teamStats);
     Clipboard.setData(ClipboardData(text: csv)).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -211,22 +248,42 @@ class StatsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Compile stats
-    final playerStatsList = match.players.map((p) => _calculatePlayerStats(p)).toList();
+    final playerStatsList = match.players
+        .map((p) => _calculatePlayerStats(p))
+        .toList();
     final teamStats = _calculateTeamStats();
 
     // Calculations for overview charts
-    int usAces = playerStatsList.fold(0, (sum, item) => sum + item.aces) + teamStats.aces;
-    int usAttacks = playerStatsList.fold(0, (sum, item) => sum + item.attacks) + teamStats.attacks;
-    int usBlocks = playerStatsList.fold(0, (sum, item) => sum + item.blocks) + teamStats.blocks;
+    int usAces =
+        playerStatsList.fold(0, (sum, item) => sum + item.aces) +
+        teamStats.aces;
+    int usAttacks =
+        playerStatsList.fold(0, (sum, item) => sum + item.attacks) +
+        teamStats.attacks;
+    int usBlocks =
+        playerStatsList.fold(0, (sum, item) => sum + item.blocks) +
+        teamStats.blocks;
     int usTotalEarned = usAces + usAttacks + usBlocks;
     int usOpponentErrors = _opponentErrors;
     int usGrandTotal = usTotalEarned + usOpponentErrors;
 
-    int themServeErrors = playerStatsList.fold(0, (sum, item) => sum + item.serveErrors) + teamStats.serveErrors;
-    int themAttackErrors = playerStatsList.fold(0, (sum, item) => sum + item.attackErrors) + teamStats.attackErrors;
-    int themReceptionErrors = playerStatsList.fold(0, (sum, item) => sum + item.receptionErrors) + teamStats.receptionErrors;
-    int themOtherErrors = playerStatsList.fold(0, (sum, item) => sum + item.otherErrors) + teamStats.otherErrors;
-    int themTotalErrors = themServeErrors + themAttackErrors + themReceptionErrors + themOtherErrors;
+    int themServeErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.serveErrors) +
+        teamStats.serveErrors;
+    int themAttackErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.attackErrors) +
+        teamStats.attackErrors;
+    int themReceptionErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.receptionErrors) +
+        teamStats.receptionErrors;
+    int themOtherErrors =
+        playerStatsList.fold(0, (sum, item) => sum + item.otherErrors) +
+        teamStats.otherErrors;
+    int themTotalErrors =
+        themServeErrors +
+        themAttackErrors +
+        themReceptionErrors +
+        themOtherErrors;
     int themOpponentWinners = _opponentWinners;
     int themGrandTotal = themTotalErrors + themOpponentWinners;
 
@@ -300,14 +357,20 @@ class StatsScreen extends StatelessWidget {
       children: [
         // Match Result Card
         Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
                 Text(
                   match.name,
-                  style: const TextStyle(fontSize: 16, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -315,11 +378,18 @@ class StatsScreen extends StatelessWidget {
                   children: [
                     Text(
                       match.teamName,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF8FAFC),
                         borderRadius: BorderRadius.circular(12),
@@ -327,13 +397,21 @@ class StatsScreen extends StatelessWidget {
                       ),
                       child: Text(
                         '${match.setsWonUs} - ${match.setsWonThem}',
-                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0F172A),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 8),
                     const Text(
                       'Adversaires',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
                     ),
                   ],
                 ),
@@ -343,7 +421,9 @@ class StatsScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: match.isFinished ? const Color(0xFF10B981) : const Color(0xFFF59E0B),
+                    color: match.isFinished
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFF59E0B),
                   ),
                 ),
               ],
@@ -353,9 +433,13 @@ class StatsScreen extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Earned points Breakdown (US)
-        _buildSectionHeader('Détail des points marqués par notre collectif (${totalUs} pts)'),
+        _buildSectionHeader(
+          'Détail des points marqués par notre collectif ($totalUs pts)',
+        ),
         Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -364,15 +448,38 @@ class StatsScreen extends StatelessWidget {
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Text('Aucune donnée enregistrée pour ce match.', style: TextStyle(fontStyle: FontStyle.italic)),
+                      child: Text(
+                        'Aucune donnée enregistrée pour ce match.',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
                     ),
                   )
                 else ...[
-                  _buildStatBar('Attaques Gagnantes', attacks, totalUs, const Color(0xFF3B82F6)),
-                  _buildStatBar('Blocs Gagnants', blocks, totalUs, const Color(0xFF10B981)),
-                  _buildStatBar('Aces (Services gagnants)', aces, totalUs, const Color(0xFFF59E0B)),
-                  _buildStatBar('Erreurs de l\'adversaire', oppErrors, totalUs, const Color(0xFF64748B)),
-                ]
+                  _buildStatBar(
+                    'Attaques Gagnantes',
+                    attacks,
+                    totalUs,
+                    const Color(0xFF3B82F6),
+                  ),
+                  _buildStatBar(
+                    'Blocs Gagnants',
+                    blocks,
+                    totalUs,
+                    const Color(0xFF10B981),
+                  ),
+                  _buildStatBar(
+                    'Aces (Services gagnants)',
+                    aces,
+                    totalUs,
+                    const Color(0xFFF59E0B),
+                  ),
+                  _buildStatBar(
+                    'Erreurs de l\'adversaire',
+                    oppErrors,
+                    totalUs,
+                    const Color(0xFF64748B),
+                  ),
+                ],
               ],
             ),
           ),
@@ -380,9 +487,13 @@ class StatsScreen extends StatelessWidget {
         const SizedBox(height: 16),
 
         // Points Given/Conceded breakdown
-        _buildSectionHeader('Détail des points concédés à l\'adversaire (${totalThem} pts)'),
+        _buildSectionHeader(
+          'Détail des points concédés à l\'adversaire ($totalThem pts)',
+        ),
         Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -391,16 +502,44 @@ class StatsScreen extends StatelessWidget {
                   const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),
-                      child: Text('Aucune donnée enregistrée pour ce match.', style: TextStyle(fontStyle: FontStyle.italic)),
+                      child: Text(
+                        'Aucune donnée enregistrée pour ce match.',
+                        style: TextStyle(fontStyle: FontStyle.italic),
+                      ),
                     ),
                   )
                 else ...[
-                  _buildStatBar('Points directs adverse', oppWinners, totalThem, const Color(0xFFEF4444)),
-                  _buildStatBar('Nos fautes de service', serveErr, totalThem, const Color(0xFFF43F5E)),
-                  _buildStatBar('Nos fautes d\'attaque', attackErr, totalThem, const Color(0xFFFB7185)),
-                  _buildStatBar('Nos erreurs de réception', recepErr, totalThem, const Color(0xFFFDA4AF)),
-                  _buildStatBar('Nos fautes de filet / autres', otherErr, totalThem, const Color(0xFF94A3B8)),
-                ]
+                  _buildStatBar(
+                    'Points directs adverse',
+                    oppWinners,
+                    totalThem,
+                    const Color(0xFFEF4444),
+                  ),
+                  _buildStatBar(
+                    'Nos fautes de service',
+                    serveErr,
+                    totalThem,
+                    const Color(0xFFF43F5E),
+                  ),
+                  _buildStatBar(
+                    'Nos fautes d\'attaque',
+                    attackErr,
+                    totalThem,
+                    const Color(0xFFFB7185),
+                  ),
+                  _buildStatBar(
+                    'Nos erreurs de réception',
+                    recepErr,
+                    totalThem,
+                    const Color(0xFFFDA4AF),
+                  ),
+                  _buildStatBar(
+                    'Nos fautes de filet / autres',
+                    otherErr,
+                    totalThem,
+                    const Color(0xFF94A3B8),
+                  ),
+                ],
               ],
             ),
           ),
@@ -409,17 +548,27 @@ class StatsScreen extends StatelessWidget {
 
         // Quick CSV copy button card
         Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           color: const Color(0xFF0F172A),
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
               children: [
-                const Icon(Icons.table_chart, color: Color(0xFFF59E0B), size: 40),
+                const Icon(
+                  Icons.table_chart,
+                  color: Color(0xFFF59E0B),
+                  size: 40,
+                ),
                 const SizedBox(height: 12),
                 const Text(
                   'Exporter pour Excel ou Google Sheets',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -432,7 +581,9 @@ class StatsScreen extends StatelessWidget {
                 ElevatedButton.icon(
                   onPressed: () {
                     // Compile stats again for callback
-                    final list = match.players.map((p) => _calculatePlayerStats(p)).toList();
+                    final list = match.players
+                        .map((p) => _calculatePlayerStats(p))
+                        .toList();
                     final team = _calculateTeamStats();
                     _exportCSV(context, list, team);
                   },
@@ -441,8 +592,13 @@ class StatsScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFF59E0B),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ],
@@ -454,10 +610,18 @@ class StatsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPlayerStatsTab(List<_PlayerStats> playerStatsList, _PlayerStats teamStats) {
-    if (playerStatsList.isEmpty && teamStats.totalPoints == 0 && teamStats.totalErrors == 0) {
+  Widget _buildPlayerStatsTab(
+    List<_PlayerStats> playerStatsList,
+    _PlayerStats teamStats,
+  ) {
+    if (playerStatsList.isEmpty &&
+        teamStats.totalPoints == 0 &&
+        teamStats.totalErrors == 0) {
       return const Center(
-        child: Text('Aucune statistique de joueur disponible.', style: TextStyle(fontStyle: FontStyle.italic)),
+        child: Text(
+          'Aucune statistique de joueur disponible.',
+          style: TextStyle(fontStyle: FontStyle.italic),
+        ),
       );
     }
 
@@ -469,23 +633,86 @@ class StatsScreen extends StatelessWidget {
         children: [
           _buildSectionHeader('Statistiques individuelles'),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: DataTable(
                 columnSpacing: 18,
-                headingRowColor: MaterialStateProperty.all(const Color(0xFFF8FAFC)),
+                headingRowColor: WidgetStateProperty.all(
+                  const Color(0xFFF8FAFC),
+                ),
                 columns: const [
-                  DataColumn(label: Text('Joueur', style: TextStyle(fontWeight: FontWeight.bold))),
-                  DataColumn(label: Text('Pts', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('Aces', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('Att', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('Blcs', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('Err', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('ErrS', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('ErrA', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('ErrR', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                  DataColumn(label: Text('Bilan', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                  DataColumn(
+                    label: Text(
+                      'Joueur',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Pts',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Aces',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Att',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Blcs',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Err',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'ErrS',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'ErrA',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'ErrR',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
+                  DataColumn(
+                    label: Text(
+                      'Bilan',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    numeric: true,
+                  ),
                 ],
                 rows: [
                   // Individual Player Rows
@@ -493,7 +720,12 @@ class StatsScreen extends StatelessWidget {
                     final isPositiveBilan = stats.netContribution >= 0;
                     return DataRow(
                       cells: [
-                        DataCell(Text('${stats.player.name} (${stats.player.number})', style: const TextStyle(fontWeight: FontWeight.w600))),
+                        DataCell(
+                          Text(
+                            '${stats.player.name} (${stats.player.number})',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
                         DataCell(Text('${stats.totalPoints}')),
                         DataCell(Text('${stats.aces}')),
                         DataCell(Text('${stats.attacks}')),
@@ -507,19 +739,26 @@ class StatsScreen extends StatelessWidget {
                             '${isPositiveBilan ? "+" : ""}${stats.netContribution}',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: isPositiveBilan ? Colors.green : Colors.red,
+                              color: isPositiveBilan
+                                  ? Colors.green
+                                  : Colors.red,
                             ),
                           ),
                         ),
                       ],
                     );
-                  }).toList(),
+                  }),
 
                   // Team Actions Row
                   DataRow(
-                    color: MaterialStateProperty.all(const Color(0xFFF8FAFC)),
+                    color: WidgetStateProperty.all(const Color(0xFFF8FAFC)),
                     cells: [
-                      const DataCell(Text('Collectif (Non spécifié)', style: TextStyle(fontStyle: FontStyle.italic))),
+                      const DataCell(
+                        Text(
+                          'Collectif (Non spécifié)',
+                          style: TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                      ),
                       DataCell(Text('${teamStats.totalPoints}')),
                       DataCell(Text('${teamStats.aces}')),
                       DataCell(Text('${teamStats.attacks}')),
@@ -533,7 +772,9 @@ class StatsScreen extends StatelessWidget {
                           '${teamStats.netContribution >= 0 ? "+" : ""}${teamStats.netContribution}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: teamStats.netContribution >= 0 ? Colors.green : Colors.red,
+                            color: teamStats.netContribution >= 0
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ),
@@ -549,12 +790,31 @@ class StatsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Légende des colonnes :', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF64748B))),
+                Text(
+                  'Légende des colonnes :',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
                 SizedBox(height: 4),
-                Text('- Pts : Total points marqués par le joueur (Aces + Attaques + Blocs)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                Text('- Att / Blcs : Attaques gagnantes / Blocs gagnants', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                Text('- Err / ErrS / ErrA / ErrR : Total fautes / Fautes service / Fautes attaque / Erreurs réception', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                Text('- Bilan : Points marqués moins Fautes commises (Contribution nette)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                Text(
+                  '- Pts : Total points marqués par le joueur (Aces + Attaques + Blocs)',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+                Text(
+                  '- Att / Blcs : Attaques gagnantes / Blocs gagnants',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+                Text(
+                  '- Err / ErrS / ErrA / ErrR : Total fautes / Fautes service / Fautes attaque / Erreurs réception',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
+                Text(
+                  '- Bilan : Points marqués moins Fautes commises (Contribution nette)',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                ),
               ],
             ),
           ),
@@ -592,11 +852,19 @@ class StatsScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF334155),
+                ),
               ),
               Text(
                 '$count ($displayPercent%)',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ],
           ),
@@ -652,6 +920,7 @@ class _PlayerStats {
   });
 
   int get totalPoints => aces + attacks + blocks;
-  int get totalErrors => serveErrors + attackErrors + receptionErrors + otherErrors;
+  int get totalErrors =>
+      serveErrors + attackErrors + receptionErrors + otherErrors;
   int get netContribution => totalPoints - totalErrors;
 }

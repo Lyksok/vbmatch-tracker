@@ -6,12 +6,12 @@ void main() {
 }
 
 class VolleyScoreApp extends StatelessWidget {
-  const VolleyScoreApp({Key? key}) : super(key: key);
+  const VolleyScoreApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Volley Score',
+      title: 'Volley Score/Stats',
       debugShowCheckedModeBanner: false,
       // Define a custom, premium theme using curated colors: Deep Navy (#0F172A) & Warm Amber (#F59E0B)
       theme: ThemeData(
@@ -26,7 +26,9 @@ class VolleyScoreApp extends StatelessWidget {
         // Style standard buttons globally for consistency
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
         ),
@@ -37,7 +39,9 @@ class VolleyScoreApp extends StatelessWidget {
         ),
         // Style chips globally
         chipTheme: ChipThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           side: BorderSide(color: Colors.grey.shade300),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         ),

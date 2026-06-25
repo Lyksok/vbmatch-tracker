@@ -5,7 +5,7 @@ import 'team_management_screen.dart';
 import 'team_stats_screen.dart';
 
 class TeamsTab extends StatefulWidget {
-  const TeamsTab({Key? key}) : super(key: key);
+  const TeamsTab({super.key});
 
   @override
   State<TeamsTab> createState() => _TeamsTabState();
@@ -37,7 +37,9 @@ class _TeamsTabState extends State<TeamsTab> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Supprimer le collectif ?'),
-        content: Text('Voulez-vous vraiment supprimer le collectif "${team.name}" ? Les joueurs et le collectif ne seront plus modifiables, mais l\'historique des matchs sera conservé.'),
+        content: Text(
+          'Voulez-vous vraiment supprimer le collectif "${team.name}" ? Les joueurs et le collectif ne seront plus modifiables, mais l\'historique des matchs sera conservé.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -46,10 +48,15 @@ class _TeamsTabState extends State<TeamsTab> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('SUPPRIMER', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'SUPPRIMER',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -59,7 +66,7 @@ class _TeamsTabState extends State<TeamsTab> {
       final allTeams = await _storageService.loadTeams();
       allTeams.removeWhere((t) => t.id == team.id);
       await _storageService.saveTeams(allTeams);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Collectif supprimé avec succès'),
@@ -73,7 +80,9 @@ class _TeamsTabState extends State<TeamsTab> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B)));
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
+      );
     }
 
     if (_teams.isEmpty) {
@@ -83,7 +92,12 @@ class _TeamsTabState extends State<TeamsTab> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       body: ListView.builder(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 90),
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          top: 16,
+          bottom: 90,
+        ),
         itemCount: _teams.length,
         itemBuilder: (context, index) {
           final team = _teams[index];
@@ -95,7 +109,9 @@ class _TeamsTabState extends State<TeamsTab> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+            MaterialPageRoute(
+              builder: (context) => const TeamManagementScreen(),
+            ),
           );
           if (result == true) {
             _loadTeams();
@@ -131,7 +147,7 @@ class _TeamsTabState extends State<TeamsTab> {
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
-                    )
+                    ),
                   ],
                 ),
                 child: const Icon(
@@ -153,10 +169,7 @@ class _TeamsTabState extends State<TeamsTab> {
               const SizedBox(height: 12),
               const Text(
                 'Créez vos collectifs (3x3, 4x4, 6x6) avec leurs joueurs pour simplifier la saisie de vos matchs et suivre leurs statistiques !',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF64748B),
-                ),
+                style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -164,7 +177,9 @@ class _TeamsTabState extends State<TeamsTab> {
                 onPressed: () async {
                   final result = await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const TeamManagementScreen(),
+                    ),
                   );
                   if (result == true) {
                     _loadTeams();
@@ -178,8 +193,13 @@ class _TeamsTabState extends State<TeamsTab> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3B82F6),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 2,
                 ),
               ),
@@ -217,7 +237,10 @@ class _TeamsTabState extends State<TeamsTab> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF3B82F6).withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
@@ -243,7 +266,10 @@ class _TeamsTabState extends State<TeamsTab> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444)),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFFEF4444),
+                  ),
                   tooltip: 'Supprimer',
                   onPressed: () => _deleteTeam(team),
                 ),
@@ -283,7 +309,9 @@ class _TeamsTabState extends State<TeamsTab> {
                     backgroundColor: const Color(0xFF64748B),
                     foregroundColor: Colors.white,
                     elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                 ),

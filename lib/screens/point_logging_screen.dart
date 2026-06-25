@@ -7,11 +7,11 @@ class PointLoggingScreen extends StatefulWidget {
   final List<Player> players;
 
   const PointLoggingScreen({
-    Key? key,
+    super.key,
     required this.winningTeam,
     required this.teamName,
     required this.players,
-  }) : super(key: key);
+  });
 
   @override
   State<PointLoggingScreen> createState() => _PointLoggingScreenState();
@@ -24,7 +24,8 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
   // Check if the selected action requires player attribution
   bool get _requiresPlayer {
     if (_selectedAction == null) return false;
-    if (_selectedAction == PointAction.erreurAdverse || _selectedAction == PointAction.pointAdversaire) {
+    if (_selectedAction == PointAction.erreurAdverse ||
+        _selectedAction == PointAction.pointAdversaire) {
       return false;
     }
     return true;
@@ -47,7 +48,10 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
 
   void _onPlayerSelected(String? playerId) {
     if (_selectedAction != null) {
-      Navigator.pop(context, _LoggingResult(action: _selectedAction!, playerId: playerId));
+      Navigator.pop(
+        context,
+        _LoggingResult(action: _selectedAction!, playerId: playerId),
+      );
     }
   }
 
@@ -56,12 +60,16 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
     final isUs = widget.winningTeam == 'us';
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // Dark slate background matching the scoring board
+      backgroundColor: const Color(
+        0xFF0F172A,
+      ), // Dark slate background matching the scoring board
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E293B),
         foregroundColor: Colors.white,
         title: Text(
-          isUs ? 'Point pour ${widget.teamName} 🎉' : 'Point pour les Adversaires 🏐',
+          isUs
+              ? 'Point pour ${widget.teamName} 🎉'
+              : 'Point pour les Adversaires 🏐',
           style: TextStyle(
             color: isUs ? const Color(0xFF10B981) : const Color(0xFFEF4444),
             fontWeight: FontWeight.bold,
@@ -79,7 +87,9 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
           transitionBuilder: (Widget child, Animation<double> animation) {
             return FadeTransition(opacity: animation, child: child);
           },
-          child: _currentStep == 1 ? _buildActionStep(isUs) : _buildPlayerStep(),
+          child: _currentStep == 1
+              ? _buildActionStep(isUs)
+              : _buildPlayerStep(),
         ),
       ),
     );
@@ -88,13 +98,18 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
   Widget _buildActionStep(bool isUs) {
     // Actions selection
     final availableActions = isUs
-        ? [PointAction.ace, PointAction.attaque, PointAction.contre, PointAction.erreurAdverse]
+        ? [
+            PointAction.ace,
+            PointAction.attaque,
+            PointAction.contre,
+            PointAction.erreurAdverse,
+          ]
         : [
             PointAction.fauteService,
             PointAction.fauteAttaque,
             PointAction.erreurReception,
             PointAction.fauteFiletAutre,
-            PointAction.pointAdversaire
+            PointAction.pointAdversaire,
           ];
 
     return Column(
@@ -146,9 +161,21 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: _buildActionCard(actions[0], cardColors[0], cardIcons[0])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[0],
+                  cardColors[0],
+                  cardIcons[0],
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildActionCard(actions[1], cardColors[1], cardIcons[1])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[1],
+                  cardColors[1],
+                  cardIcons[1],
+                ),
+              ),
             ],
           ),
         ),
@@ -156,9 +183,21 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: _buildActionCard(actions[2], cardColors[2], cardIcons[2])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[2],
+                  cardColors[2],
+                  cardIcons[2],
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildActionCard(actions[3], cardColors[3], cardIcons[3])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[3],
+                  cardColors[3],
+                  cardIcons[3],
+                ),
+              ),
             ],
           ),
         ),
@@ -189,9 +228,21 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: _buildActionCard(actions[0], cardColors[0], cardIcons[0])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[0],
+                  cardColors[0],
+                  cardIcons[0],
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildActionCard(actions[1], cardColors[1], cardIcons[1])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[1],
+                  cardColors[1],
+                  cardIcons[1],
+                ),
+              ),
             ],
           ),
         ),
@@ -199,9 +250,21 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: _buildActionCard(actions[2], cardColors[2], cardIcons[2])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[2],
+                  cardColors[2],
+                  cardIcons[2],
+                ),
+              ),
               const SizedBox(width: 16),
-              Expanded(child: _buildActionCard(actions[3], cardColors[3], cardIcons[3])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[3],
+                  cardColors[3],
+                  cardIcons[3],
+                ),
+              ),
             ],
           ),
         ),
@@ -209,13 +272,21 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
         Expanded(
           child: Row(
             children: [
-              Expanded(child: _buildActionCard(actions[4], cardColors[4], cardIcons[4])),
+              Expanded(
+                child: _buildActionCard(
+                  actions[4],
+                  cardColors[4],
+                  cardIcons[4],
+                ),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Card(
                   elevation: 4,
                   color: const Color(0xFF334155),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(16),
                     onTap: () => Navigator.pop(context),
@@ -223,11 +294,19 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.arrow_back, color: Colors.white70, size: 40),
+                          Icon(
+                            Icons.arrow_back,
+                            color: Colors.white70,
+                            size: 40,
+                          ),
                           SizedBox(height: 12),
                           Text(
                             'Retour / Annuler',
-                            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -277,7 +356,8 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
   }
 
   Widget _buildPlayerStep() {
-    final title = _selectedAction == PointAction.ace ||
+    final title =
+        _selectedAction == PointAction.ace ||
             _selectedAction == PointAction.attaque ||
             _selectedAction == PointAction.contre
         ? 'Quel joueur a marqué ?'
@@ -302,7 +382,11 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
               const SizedBox(height: 6),
               Text(
                 'Action sélectionnée : ${_selectedAction?.label}',
-                style: const TextStyle(color: Color(0xFFF59E0B), fontWeight: FontWeight.w500, fontSize: 14),
+                style: const TextStyle(
+                  color: Color(0xFFF59E0B),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -311,7 +395,9 @@ class _PointLoggingScreenState extends State<PointLoggingScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: GridView.builder(
-              itemCount: widget.players.length + 2, // Players + Team option + Back option
+              itemCount:
+                  widget.players.length +
+                  2, // Players + Team option + Back option
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 1.3,

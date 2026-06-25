@@ -5,7 +5,7 @@ import '../services/storage_service.dart';
 
 class TeamManagementScreen extends StatefulWidget {
   final Team? team; // If null, we are creating a new team
-  const TeamManagementScreen({Key? key, this.team}) : super(key: key);
+  const TeamManagementScreen({super.key, this.team});
 
   @override
   State<TeamManagementScreen> createState() => _TeamManagementScreenState();
@@ -17,14 +17,14 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
 
   final TextEditingController _teamNameController = TextEditingController();
   final TextEditingController _playerNumberController = TextEditingController();
-  
+
   // Custom controller for Autocomplete field view
   TextEditingController? _playerNameController;
 
   String _selectedType = '6x6'; // Default format
   List<Player> _teamPlayers = [];
   List<Player> _globalPlayers = [];
-  
+
   Player? _selectedGlobalPlayer;
 
   @override
@@ -92,7 +92,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
     setState(() {
       // Determine if we reuse a global player's ID or create a new one
       String playerId;
-      if (_selectedGlobalPlayer != null && _selectedGlobalPlayer!.name.toLowerCase() == name.toLowerCase()) {
+      if (_selectedGlobalPlayer != null &&
+          _selectedGlobalPlayer!.name.toLowerCase() == name.toLowerCase()) {
         playerId = _selectedGlobalPlayer!.id;
       } else {
         // Search global players by name just in case they didn't tap the suggestion
@@ -100,18 +101,16 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
           (p) => p.name.toLowerCase() == name.toLowerCase(),
           orElse: () => Player(id: '', name: '', number: 0),
         );
-        playerId = existing.id.isNotEmpty ? existing.id : DateTime.now().millisecondsSinceEpoch.toString();
+        playerId = existing.id.isNotEmpty
+            ? existing.id
+            : DateTime.now().millisecondsSinceEpoch.toString();
       }
 
-      _teamPlayers.add(Player(
-        id: playerId,
-        name: name,
-        number: number,
-      ));
+      _teamPlayers.add(Player(id: playerId, name: name, number: number));
 
       // Sort by jersey number
       _teamPlayers.sort((a, b) => a.number.compareTo(b.number));
-      
+
       // Clear inputs
       _playerNameController?.clear();
       _playerNumberController.clear();
@@ -131,7 +130,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
     }
 
     final allTeams = await _storageService.loadTeams();
-    final teamId = widget.team?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    final teamId =
+        widget.team?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
     final teamName = _teamNameController.text.trim();
 
     final updatedTeam = Team(
@@ -160,7 +160,9 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
     final List<Player> updatedGlobalPlayers = List.from(_globalPlayers);
     for (var player in _teamPlayers) {
       final existingIndex = updatedGlobalPlayers.indexWhere(
-        (gp) => gp.id == player.id || gp.name.toLowerCase() == player.name.toLowerCase()
+        (gp) =>
+            gp.id == player.id ||
+            gp.name.toLowerCase() == player.name.toLowerCase(),
       );
       if (existingIndex == -1) {
         updatedGlobalPlayers.add(player);
@@ -181,7 +183,11 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text(widget.team == null ? 'Nouveau Collectif 🏐' : 'Modifier le Collectif'),
+        title: Text(
+          widget.team == null
+              ? 'Nouveau Collectif 🏐'
+              : 'Modifier le Collectif',
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         elevation: 2,
@@ -234,9 +240,16 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                         final isSelected = _selectedType == type;
                         return Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4.0,
+                            ),
                             child: ChoiceChip(
-                              label: Text(type, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              label: Text(
+                                type,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               selected: isSelected,
                               onSelected: (selected) {
                                 if (selected) {
@@ -245,7 +258,9 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                               },
                               selectedColor: const Color(0xFF3B82F6),
                               labelStyle: TextStyle(
-                                color: isSelected ? Colors.white : Colors.black87,
+                                color: isSelected
+                                    ? Colors.white
+                                    : Colors.black87,
                               ),
                               checkmarkColor: Colors.white,
                             ),
@@ -280,7 +295,9 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                           child: TextField(
                             controller: _playerNumberController,
                             keyboardType: TextInputType.number,
-                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             decoration: const InputDecoration(
                               labelText: 'N° (défaut)',
                               border: OutlineInputBorder(),
@@ -292,93 +309,128 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                         Expanded(
                           flex: 5,
                           child: RawAutocomplete<Player>(
-                            optionsBuilder: (TextEditingValue textEditingValue) {
-                              if (textEditingValue.text.isEmpty) {
-                                return const Iterable<Player>.empty();
-                              }
-                              return _globalPlayers.where((Player option) {
-                                return option.name
-                                    .toLowerCase()
-                                    .contains(textEditingValue.text.toLowerCase());
-                              });
-                            },
-                            displayStringForOption: (Player option) => option.name,
+                            optionsBuilder:
+                                (TextEditingValue textEditingValue) {
+                                  if (textEditingValue.text.isEmpty) {
+                                    return const Iterable<Player>.empty();
+                                  }
+                                  return _globalPlayers.where((Player option) {
+                                    return option.name.toLowerCase().contains(
+                                      textEditingValue.text.toLowerCase(),
+                                    );
+                                  });
+                                },
+                            displayStringForOption: (Player option) =>
+                                option.name,
                             onSelected: (Player selection) {
                               setState(() {
                                 _selectedGlobalPlayer = selection;
                                 _playerNameController?.text = selection.name;
-                                _playerNumberController.text = selection.number.toString();
+                                _playerNumberController.text = selection.number
+                                    .toString();
                               });
                             },
-                            fieldViewBuilder: (
-                              BuildContext context,
-                              TextEditingController textEditingController,
-                              FocusNode focusNode,
-                              VoidCallback onFieldSubmitted,
-                            ) {
-                              _playerNameController = textEditingController;
-                              return TextField(
-                                controller: textEditingController,
-                                focusNode: focusNode,
-                                textCapitalization: TextCapitalization.words,
-                                decoration: const InputDecoration(
-                                  labelText: 'Nom du joueur',
-                                  border: OutlineInputBorder(),
-                                  prefixIcon: Icon(Icons.person_add_alt_1),
-                                ),
-                              );
-                            },
-                            optionsViewBuilder: (
-                              BuildContext context,
-                              AutocompleteOnSelected<Player> onSelected,
-                              Iterable<Player> options,
-                            ) {
-                              return Align(
-                                alignment: Alignment.topLeft,
-                                child: Material(
-                                  elevation: 4.0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  color: Colors.white,
-                                  child: Container(
-                                    width: MediaQuery.of(context).size.width * 0.55,
-                                    constraints: const BoxConstraints(maxHeight: 200),
-                                    child: ListView.builder(
-                                      padding: EdgeInsets.zero,
-                                      shrinkWrap: true,
-                                      itemCount: options.length,
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final Player option = options.elementAt(index);
-                                        return InkWell(
-                                          onTap: () => onSelected(option),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    option.name,
-                                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                                    maxLines: 1,
-                                                    overflow: TextOverflow.ellipsis,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  '#${option.number}',
-                                                  style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w500),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
+                            fieldViewBuilder:
+                                (
+                                  BuildContext context,
+                                  TextEditingController textEditingController,
+                                  FocusNode focusNode,
+                                  VoidCallback onFieldSubmitted,
+                                ) {
+                                  _playerNameController = textEditingController;
+                                  return TextField(
+                                    controller: textEditingController,
+                                    focusNode: focusNode,
+                                    textCapitalization:
+                                        TextCapitalization.words,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nom du joueur',
+                                      border: OutlineInputBorder(),
+                                      prefixIcon: Icon(Icons.person_add_alt_1),
                                     ),
-                                  ),
-                                ),
-                              );
-                            },
+                                  );
+                                },
+                            optionsViewBuilder:
+                                (
+                                  BuildContext context,
+                                  AutocompleteOnSelected<Player> onSelected,
+                                  Iterable<Player> options,
+                                ) {
+                                  return Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Material(
+                                      elevation: 4.0,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      color: Colors.white,
+                                      child: Container(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                            0.55,
+                                        constraints: const BoxConstraints(
+                                          maxHeight: 200,
+                                        ),
+                                        child: ListView.builder(
+                                          padding: EdgeInsets.zero,
+                                          shrinkWrap: true,
+                                          itemCount: options.length,
+                                          itemBuilder:
+                                              (
+                                                BuildContext context,
+                                                int index,
+                                              ) {
+                                                final Player option = options
+                                                    .elementAt(index);
+                                                return InkWell(
+                                                  onTap: () =>
+                                                      onSelected(option),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 16.0,
+                                                          vertical: 12.0,
+                                                        ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            option.name,
+                                                            style:
+                                                                const TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          '#${option.number}',
+                                                          style: TextStyle(
+                                                            color: Colors
+                                                                .blue
+                                                                .shade700,
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -403,7 +455,10 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                         padding: EdgeInsets.symmetric(vertical: 24.0),
                         child: Text(
                           'Aucun joueur dans le collectif pour le moment.',
-                          style: TextStyle(color: Color(0xFF64748B), fontStyle: FontStyle.italic),
+                          style: TextStyle(
+                            color: Color(0xFF64748B),
+                            fontStyle: FontStyle.italic,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -412,7 +467,8 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: _teamPlayers.length,
-                        separatorBuilder: (context, index) => const Divider(height: 1),
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final player = _teamPlayers[index];
                           return ListTile(
@@ -424,11 +480,18 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                             ),
                             title: Text(
                               player.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                            subtitle: const Text('Numéro de maillot par défaut'),
+                            subtitle: const Text(
+                              'Numéro de maillot par défaut',
+                            ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.remove_circle_outline, color: Colors.redAccent),
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                                color: Colors.redAccent,
+                              ),
                               onPressed: () => _removePlayer(player.id),
                             ),
                           );
@@ -453,8 +516,14 @@ class _TeamManagementScreenState extends State<TeamManagementScreen> {
                 elevation: 2,
               ),
               child: Text(
-                widget.team == null ? 'CRÉER LE COLLECTIF 🚀' : 'SAUVEGARDER LE COLLECTIF 💾',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                widget.team == null
+                    ? 'CRÉER LE COLLECTIF 🚀'
+                    : 'SAUVEGARDER LE COLLECTIF 💾',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             const SizedBox(height: 40),

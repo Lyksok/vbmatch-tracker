@@ -6,7 +6,7 @@ import 'point_logging_screen.dart';
 
 class MatchScreen extends StatefulWidget {
   final VolleyballMatch match;
-  const MatchScreen({Key? key, required this.match}) : super(key: key);
+  const MatchScreen({super.key, required this.match});
 
   @override
   State<MatchScreen> createState() => _MatchScreenState();
@@ -92,17 +92,17 @@ class _MatchScreenState extends State<MatchScreen> {
         _match.name = newName;
       });
       await _saveMatch();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nom du match mis à jour')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Nom du match mis à jour')));
     }
   }
 
   void _handleUndo() {
     if (_match.currentSet.events.isEmpty && _match.sets.length == 1) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Aucun point à annuler')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Aucun point à annuler')));
       return;
     }
     setState(() {
@@ -126,16 +126,23 @@ class _MatchScreenState extends State<MatchScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Quitter le match ?'),
-        content: const Text('Le match est sauvegardé automatiquement. Vous pourrez le reprendre à tout moment depuis l\'accueil.'),
+        content: const Text(
+          'Le match est sauvegardé automatiquement. Vous pourrez le reprendre à tout moment depuis l\'accueil.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('CONTINUER À NOTER', style: TextStyle(color: Color(0xFF3B82F6))),
+            child: const Text(
+              'CONTINUER À NOTER',
+              style: TextStyle(color: Color(0xFF3B82F6)),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF64748B),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('QUITTER', style: TextStyle(color: Colors.white)),
@@ -151,21 +158,23 @@ class _MatchScreenState extends State<MatchScreen> {
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F172A), // Dark Background for high contrast scoring
+        backgroundColor: const Color(
+          0xFF0F172A,
+        ), // Dark Background for high contrast scoring
         appBar: AppBar(
           title: InkWell(
             onTap: _renameMatch,
             borderRadius: BorderRadius.circular(8),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8.0,
+                vertical: 4.0,
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Flexible(
-                    child: Text(
-                      _match.name,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    child: Text(_match.name, overflow: TextOverflow.ellipsis),
                   ),
                   const SizedBox(width: 6),
                   const Icon(Icons.edit, size: 16, color: Colors.white70),
@@ -190,9 +199,13 @@ class _MatchScreenState extends State<MatchScreen> {
               onPressed: () async {
                 await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => StatsScreen(match: _match)),
+                  MaterialPageRoute(
+                    builder: (context) => StatsScreen(match: _match),
+                  ),
                 );
-                setState(() {}); // Refresh in case stats screen triggered changes
+                setState(
+                  () {},
+                ); // Refresh in case stats screen triggered changes
               },
             ),
           ],
@@ -222,7 +235,9 @@ class _MatchScreenState extends State<MatchScreen> {
 
               // Main Scoreboard
               Expanded(
-                child: _match.isFinished ? _buildFinishedState() : _buildScoreboard(),
+                child: _match.isFinished
+                    ? _buildFinishedState()
+                    : _buildScoreboard(),
               ),
 
               // Bottom control bar (Undo, Switch Stats)
@@ -240,7 +255,9 @@ class _MatchScreenState extends State<MatchScreen> {
       return const SizedBox(height: 8);
     }
 
-    final scoreStrings = completedSets.map((s) => '${s.scoreUs}-${s.scoreThem}').join(', ');
+    final scoreStrings = completedSets
+        .map((s) => '${s.scoreUs}-${s.scoreThem}')
+        .join(', ');
     return Container(
       width: double.infinity,
       color: const Color(0xFF1E293B),
@@ -282,7 +299,11 @@ class _MatchScreenState extends State<MatchScreen> {
           ),
           const Text(
             'SETS GAGNÉS',
-            style: TextStyle(color: Color(0xFF64748B), fontSize: 12, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           // THEM Sets won
           Row(
@@ -338,10 +359,14 @@ class _MatchScreenState extends State<MatchScreen> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: isUsServing ? const Color(0xFF1E3A8A) : const Color(0xFF1E293B),
+                      color: isUsServing
+                          ? const Color(0xFF1E3A8A)
+                          : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isUsServing ? const Color(0xFF3B82F6) : Colors.transparent,
+                        color: isUsServing
+                            ? const Color(0xFF3B82F6)
+                            : Colors.transparent,
                         width: 3,
                       ),
                     ),
@@ -358,7 +383,10 @@ class _MatchScreenState extends State<MatchScreen> {
                   Opacity(
                     opacity: isUsServing ? 1.0 : 0.0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B),
                         borderRadius: BorderRadius.circular(12),
@@ -366,11 +394,19 @@ class _MatchScreenState extends State<MatchScreen> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.sports_volleyball, color: Colors.white, size: 14),
+                          Icon(
+                            Icons.sports_volleyball,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'AU SERVICE',
-                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -415,10 +451,14 @@ class _MatchScreenState extends State<MatchScreen> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      color: isThemServing ? const Color(0xFF7F1D1D) : const Color(0xFF1E293B),
+                      color: isThemServing
+                          ? const Color(0xFF7F1D1D)
+                          : const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isThemServing ? const Color(0xFFEF4444) : Colors.transparent,
+                        color: isThemServing
+                            ? const Color(0xFFEF4444)
+                            : Colors.transparent,
                         width: 3,
                       ),
                     ),
@@ -435,7 +475,10 @@ class _MatchScreenState extends State<MatchScreen> {
                   Opacity(
                     opacity: isThemServing ? 1.0 : 0.0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF59E0B),
                         borderRadius: BorderRadius.circular(12),
@@ -443,11 +486,19 @@ class _MatchScreenState extends State<MatchScreen> {
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.sports_volleyball, color: Colors.white, size: 14),
+                          Icon(
+                            Icons.sports_volleyball,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                           SizedBox(width: 4),
                           Text(
                             'AU SERVICE',
-                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -466,7 +517,9 @@ class _MatchScreenState extends State<MatchScreen> {
     final winnerText = _match.setsWonUs >= _match.winningSetsNeeded
         ? 'Victoire de ${_match.teamName} ! 🏆'
         : 'Victoire des Adversaires';
-    final winnerColor = _match.setsWonUs >= _match.winningSetsNeeded ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final winnerColor = _match.setsWonUs >= _match.winningSetsNeeded
+        ? const Color(0xFF10B981)
+        : const Color(0xFFEF4444);
 
     return Center(
       child: Padding(
@@ -475,7 +528,9 @@ class _MatchScreenState extends State<MatchScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _match.setsWonUs >= _match.winningSetsNeeded ? Icons.emoji_events : Icons.sentiment_dissatisfied,
+              _match.setsWonUs >= _match.winningSetsNeeded
+                  ? Icons.emoji_events
+                  : Icons.sentiment_dissatisfied,
               size: 80,
               color: winnerColor,
             ),
@@ -492,17 +547,16 @@ class _MatchScreenState extends State<MatchScreen> {
             const SizedBox(height: 12),
             Text(
               'Score final : ${_match.setsWonUs} sets à ${_match.setsWonThem}',
-              style: const TextStyle(
-                color: Color(0xFF94A3B8),
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 16),
             ),
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => StatsScreen(match: _match)),
+                  MaterialPageRoute(
+                    builder: (context) => StatsScreen(match: _match),
+                  ),
                 );
               },
               icon: const Icon(Icons.analytics),
@@ -510,8 +564,13 @@ class _MatchScreenState extends State<MatchScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B82F6),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -534,14 +593,18 @@ class _MatchScreenState extends State<MatchScreen> {
                   contentPadding: EdgeInsets.zero,
                   title: const Text(
                     'Ignorer les stats',
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   subtitle: const Text(
                     'Saisie rapide',
                     style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11),
                   ),
                   value: _match.ignoreStats,
-                  activeColor: const Color(0xFFF59E0B),
+                  activeThumbColor: const Color(0xFFF59E0B),
                   onChanged: (val) {
                     setState(() {
                       _match.ignoreStats = val;
@@ -559,8 +622,13 @@ class _MatchScreenState extends State<MatchScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF475569),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
             ],
@@ -569,8 +637,12 @@ class _MatchScreenState extends State<MatchScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: const Text(
-                'Astuce : Tapez sur le score d\'un collectif pour ajouter un point.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 11, fontStyle: FontStyle.italic),
+                'Astuce : Tapez sur le score d\'une équipe pour ajouter un point.',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 11,
+                  fontStyle: FontStyle.italic,
+                ),
               ),
             ),
         ],
@@ -578,5 +650,3 @@ class _MatchScreenState extends State<MatchScreen> {
     );
   }
 }
-
-

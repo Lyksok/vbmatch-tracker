@@ -6,7 +6,7 @@ import 'match_screen.dart';
 import 'team_management_screen.dart';
 
 class MatchSetupScreen extends StatefulWidget {
-  const MatchSetupScreen({Key? key}) : super(key: key);
+  const MatchSetupScreen({super.key});
 
   @override
   State<MatchSetupScreen> createState() => _MatchSetupScreenState();
@@ -35,7 +35,8 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
     super.initState();
     // Pre-fill match name with current date
     final now = DateTime.now();
-    _matchNameController.text = 'Match du ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
+    _matchNameController.text =
+        'Match du ${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year}';
     _loadTeams();
   }
 
@@ -110,11 +111,15 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
     }
 
     // 2. Validate jersey number uniqueness for present players
-    final presentNumbers = presentPlayers.map((p) => _playerCustomNumbers[p.id]!).toList();
+    final presentNumbers = presentPlayers
+        .map((p) => _playerCustomNumbers[p.id]!)
+        .toList();
     if (presentNumbers.toSet().length != presentNumbers.length) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Erreur : Deux joueurs présents ne peuvent pas avoir le même numéro pour un match.'),
+          content: Text(
+            'Erreur : Deux joueurs présents ne peuvent pas avoir le même numéro pour un match.',
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -148,9 +153,7 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
     if (mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => MatchScreen(match: match),
-        ),
+        MaterialPageRoute(builder: (context) => MatchScreen(match: match)),
       );
     }
   }
@@ -164,7 +167,9 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
           backgroundColor: const Color(0xFF0F172A),
           foregroundColor: Colors.white,
         ),
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B))),
+        body: const Center(
+          child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
+        ),
       );
     }
 
@@ -219,7 +224,7 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                           border: OutlineInputBorder(),
                           prefixIcon: Icon(Icons.group),
                         ),
-                        value: _selectedTeam,
+                        initialValue: _selectedTeam,
                         items: _allTeams.map((team) {
                           return DropdownMenuItem<Team>(
                             value: team,
@@ -257,7 +262,9 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                             },
                             selectedColor: const Color(0xFF3B82F6),
                             labelStyle: TextStyle(
-                              color: _winningSetsNeeded == 2 ? Colors.white : Colors.black87,
+                              color: _winningSetsNeeded == 2
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                             checkmarkColor: Colors.white,
                           ),
@@ -274,7 +281,9 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                             },
                             selectedColor: const Color(0xFF3B82F6),
                             labelStyle: TextStyle(
-                              color: _winningSetsNeeded == 3 ? Colors.white : Colors.black87,
+                              color: _winningSetsNeeded == 3
+                                  ? Colors.white
+                                  : Colors.black87,
                             ),
                             checkmarkColor: Colors.white,
                           ),
@@ -284,9 +293,11 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                     const SizedBox(height: 12),
                     SwitchListTile(
                       title: const Text('Ignorer les statistiques par défaut'),
-                      subtitle: const Text('Compte uniquement les points sans attribuer les actions aux joueurs.'),
+                      subtitle: const Text(
+                        'Compte uniquement les points sans attribuer les actions aux joueurs.',
+                      ),
                       value: _ignoreStats,
-                      activeColor: const Color(0xFFF59E0B),
+                      activeThumbColor: const Color(0xFFF59E0B),
                       onChanged: (val) {
                         setState(() => _ignoreStats = val);
                       },
@@ -312,7 +323,11 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Format de collectif : ${_selectedTeam!.type} (min. ${(_selectedTeam!.type == '3x3' ? 3 : _selectedTeam!.type == '4x4' ? 4 : 6)} joueurs actifs requis)',
+                        'Format de collectif : ${_selectedTeam!.type} (min. ${(_selectedTeam!.type == '3x3'
+                            ? 3
+                            : _selectedTeam!.type == '4x4'
+                            ? 4
+                            : 6)} joueurs actifs requis)',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.blue.shade800,
@@ -325,7 +340,10 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                           padding: EdgeInsets.symmetric(vertical: 16.0),
                           child: Text(
                             'Ce collectif n\'a aucun joueur. Allez dans l\'onglet Collectifs pour en ajouter.',
-                            style: TextStyle(color: Colors.redAccent, fontStyle: FontStyle.italic),
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontStyle: FontStyle.italic,
+                            ),
                           ),
                         )
                       else
@@ -336,8 +354,11 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                           separatorBuilder: (context, index) => const Divider(),
                           itemBuilder: (context, index) {
                             final player = _selectedTeam!.players[index];
-                            final isAbsent = _playerAbsentees[player.id] ?? false;
-                            final customNumber = _playerCustomNumbers[player.id] ?? player.number;
+                            final isAbsent =
+                                _playerAbsentees[player.id] ?? false;
+                            final customNumber =
+                                _playerCustomNumbers[player.id] ??
+                                player.number;
 
                             return Row(
                               children: [
@@ -357,26 +378,37 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                                 // Player Name
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         player.name,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15,
-                                          color: isAbsent ? Colors.grey : const Color(0xFF0F172A),
-                                          decoration: isAbsent ? TextDecoration.lineThrough : null,
+                                          color: isAbsent
+                                              ? Colors.grey
+                                              : const Color(0xFF0F172A),
+                                          decoration: isAbsent
+                                              ? TextDecoration.lineThrough
+                                              : null,
                                         ),
                                       ),
                                       if (isAbsent)
                                         const Text(
                                           'Absent',
-                                          style: TextStyle(color: Colors.red, fontSize: 12),
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontSize: 12,
+                                          ),
                                         )
                                       else
                                         Text(
                                           'Numéro par défaut : #${player.number}',
-                                          style: const TextStyle(color: Colors.grey, fontSize: 12),
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                     ],
                                   ),
@@ -388,11 +420,16 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
                                     child: TextFormField(
                                       initialValue: customNumber.toString(),
                                       keyboardType: TextInputType.number,
-                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
                                       decoration: const InputDecoration(
                                         labelText: 'N°',
                                         border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 8,
+                                        ),
                                       ),
                                       onChanged: (val) {
                                         final num = int.tryParse(val);
@@ -427,7 +464,11 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
               ),
               child: const Text(
                 'COMMENCER LE MATCH 🚀',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
             const SizedBox(height: 40),
@@ -448,7 +489,11 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.amber, size: 40),
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.amber,
+              size: 40,
+            ),
             const SizedBox(height: 8),
             const Text(
               'Aucun collectif disponible',
@@ -465,7 +510,9 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const TeamManagementScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const TeamManagementScreen(),
+                  ),
                 );
                 if (result == true) {
                   _loadTeams();
@@ -476,7 +523,9 @@ class _MatchSetupScreenState extends State<MatchSetupScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B82F6),
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ],

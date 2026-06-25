@@ -4,7 +4,7 @@ import '../services/storage_service.dart';
 
 class TeamStatsScreen extends StatefulWidget {
   final Team team;
-  const TeamStatsScreen({Key? key, required this.team}) : super(key: key);
+  const TeamStatsScreen({super.key, required this.team});
 
   @override
   State<TeamStatsScreen> createState() => _TeamStatsScreenState();
@@ -25,7 +25,11 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
     setState(() => _isLoading = true);
     final allMatches = await _storageService.getAllMatches();
     // Filter matches played by this team (by ID if available, otherwise by Name)
-    final teamMatches = allMatches.where((m) => m.teamId == widget.team.id || m.teamName == widget.team.name).toList();
+    final teamMatches = allMatches
+        .where(
+          (m) => m.teamId == widget.team.id || m.teamName == widget.team.name,
+        )
+        .toList();
     setState(() {
       _teamMatches = teamMatches;
       _isLoading = false;
@@ -41,7 +45,9 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
           backgroundColor: const Color(0xFF0F172A),
           foregroundColor: Colors.white,
         ),
-        body: const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B))),
+        body: const Center(
+          child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
+        ),
       );
     }
 
@@ -58,11 +64,18 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.analytics_outlined, size: 64, color: Colors.grey),
+                const Icon(
+                  Icons.analytics_outlined,
+                  size: 64,
+                  color: Colors.grey,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Aucune statistique pour ${widget.team.name}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
@@ -126,7 +139,8 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
               // Find player name from match players
               final matchPlayer = match.players.firstWhere(
                 (p) => p.id == pid,
-                orElse: () => Player(id: pid, name: 'Joueur inconnu', number: 0),
+                orElse: () =>
+                    Player(id: pid, name: 'Joueur inconnu', number: 0),
               );
               playerStatsMap[pid] = _PlayerAggregatedStats(player: matchPlayer);
             }
@@ -202,8 +216,14 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
       }
     }
 
-    int totalUsPoints = totalAces + totalAttacks + totalBlocks + totalOpponentErrors;
-    int totalThemPoints = totalOpponentWinners + totalServeErrors + totalAttackErrors + totalReceptionErrors + totalOtherErrors;
+    int totalUsPoints =
+        totalAces + totalAttacks + totalBlocks + totalOpponentErrors;
+    int totalThemPoints =
+        totalOpponentWinners +
+        totalServeErrors +
+        totalAttackErrors +
+        totalReceptionErrors +
+        totalOtherErrors;
 
     final sortedPlayersList = playerStatsMap.values.toList()
       ..sort((a, b) => b.netContribution.compareTo(a.netContribution));
@@ -235,42 +255,74 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
               children: [
                 // Quick Summary Card
                 Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
                       children: [
                         const Text(
                           'Bilan des Matchs',
-                          style: TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             _buildSummaryItem('Matchs', '$matchesPlayed'),
-                            _buildSummaryItem('Victoires', '$matchesWon', color: Colors.green),
-                            _buildSummaryItem('Défaites', '$matchesLost', color: Colors.red),
+                            _buildSummaryItem(
+                              'Victoires',
+                              '$matchesWon',
+                              color: Colors.green,
+                            ),
+                            _buildSummaryItem(
+                              'Défaites',
+                              '$matchesLost',
+                              color: Colors.red,
+                            ),
                             _buildSummaryItem(
                               'Ratio V/D',
-                              matchesLost > 0 ? (matchesWon / matchesLost).toStringAsFixed(2) : '$matchesWon.00',
+                              matchesLost > 0
+                                  ? (matchesWon / matchesLost).toStringAsFixed(
+                                      2,
+                                    )
+                                  : '$matchesWon.00',
                             ),
                           ],
                         ),
                         const Divider(height: 32, thickness: 1),
                         const Text(
                           'Bilan des Sets',
-                          style: TextStyle(fontSize: 14, color: Color(0xFF64748B), fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildSummaryItem('Sets Gagnés', '$setsWon', color: const Color(0xFF3B82F6)),
-                            _buildSummaryItem('Sets Perdus', '$setsLost', color: const Color(0xFFEF4444)),
+                            _buildSummaryItem(
+                              'Sets Gagnés',
+                              '$setsWon',
+                              color: const Color(0xFF3B82F6),
+                            ),
+                            _buildSummaryItem(
+                              'Sets Perdus',
+                              '$setsLost',
+                              color: const Color(0xFFEF4444),
+                            ),
                             _buildSummaryItem(
                               'Ratio S+/S-',
-                              setsLost > 0 ? (setsWon / setsLost).toStringAsFixed(2) : '$setsWon.00',
+                              setsLost > 0
+                                  ? (setsWon / setsLost).toStringAsFixed(2)
+                                  : '$setsWon.00',
                             ),
                           ],
                         ),
@@ -281,17 +333,41 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
                 const SizedBox(height: 16),
 
                 // Points won detail
-                _buildSectionHeader('Points marqués par le collectif (${totalUsPoints} pts au total)'),
+                _buildSectionHeader(
+                  'Points marqués par le collectif ($totalUsPoints pts au total)',
+                ),
                 Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        _buildStatBar('Attaques Gagnantes', totalAttacks, totalUsPoints, const Color(0xFF3B82F6)),
-                        _buildStatBar('Blocs Gagnants', totalBlocks, totalUsPoints, const Color(0xFF10B981)),
-                        _buildStatBar('Aces (Services gagnants)', totalAces, totalUsPoints, const Color(0xFFF59E0B)),
-                        _buildStatBar('Erreurs de l\'adversaire', totalOpponentErrors, totalUsPoints, const Color(0xFF64748B)),
+                        _buildStatBar(
+                          'Attaques Gagnantes',
+                          totalAttacks,
+                          totalUsPoints,
+                          const Color(0xFF3B82F6),
+                        ),
+                        _buildStatBar(
+                          'Blocs Gagnants',
+                          totalBlocks,
+                          totalUsPoints,
+                          const Color(0xFF10B981),
+                        ),
+                        _buildStatBar(
+                          'Aces (Services gagnants)',
+                          totalAces,
+                          totalUsPoints,
+                          const Color(0xFFF59E0B),
+                        ),
+                        _buildStatBar(
+                          'Erreurs de l\'adversaire',
+                          totalOpponentErrors,
+                          totalUsPoints,
+                          const Color(0xFF64748B),
+                        ),
                       ],
                     ),
                   ),
@@ -299,18 +375,47 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
                 const SizedBox(height: 16),
 
                 // Points lost detail
-                _buildSectionHeader('Points concédés à l\'adversaire (${totalThemPoints} pts au total)'),
+                _buildSectionHeader(
+                  'Points concédés à l\'adversaire ($totalThemPoints pts au total)',
+                ),
                 Card(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        _buildStatBar('Points directs adverse', totalOpponentWinners, totalThemPoints, const Color(0xFFEF4444)),
-                        _buildStatBar('Nos fautes de service', totalServeErrors, totalThemPoints, const Color(0xFFF43F5E)),
-                        _buildStatBar('Nos fautes d\'attaque', totalAttackErrors, totalThemPoints, const Color(0xFFFB7185)),
-                        _buildStatBar('Nos erreurs de réception', totalReceptionErrors, totalThemPoints, const Color(0xFFFDA4AF)),
-                        _buildStatBar('Nos fautes de filet / autres', totalOtherErrors, totalThemPoints, const Color(0xFF94A3B8)),
+                        _buildStatBar(
+                          'Points directs adverse',
+                          totalOpponentWinners,
+                          totalThemPoints,
+                          const Color(0xFFEF4444),
+                        ),
+                        _buildStatBar(
+                          'Nos fautes de service',
+                          totalServeErrors,
+                          totalThemPoints,
+                          const Color(0xFFF43F5E),
+                        ),
+                        _buildStatBar(
+                          'Nos fautes d\'attaque',
+                          totalAttackErrors,
+                          totalThemPoints,
+                          const Color(0xFFFB7185),
+                        ),
+                        _buildStatBar(
+                          'Nos erreurs de réception',
+                          totalReceptionErrors,
+                          totalThemPoints,
+                          const Color(0xFFFDA4AF),
+                        ),
+                        _buildStatBar(
+                          'Nos fautes de filet / autres',
+                          totalOtherErrors,
+                          totalThemPoints,
+                          const Color(0xFF94A3B8),
+                        ),
                       ],
                     ),
                   ),
@@ -327,32 +432,99 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
                 children: [
                   _buildSectionHeader('Cumul des joueurs'),
                   Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
                         columnSpacing: 18,
-                        headingRowColor: MaterialStateProperty.all(const Color(0xFFF8FAFC)),
+                        headingRowColor: MaterialStateProperty.all(
+                          const Color(0xFFF8FAFC),
+                        ),
                         columns: const [
-                          DataColumn(label: Text('Joueur', style: TextStyle(fontWeight: FontWeight.bold))),
-                          DataColumn(label: Text('Pts', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Aces', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Att', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Blcs', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Err', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('ErrS', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('ErrA', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('ErrR', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
-                          DataColumn(label: Text('Bilan', style: TextStyle(fontWeight: FontWeight.bold)), numeric: true),
+                          DataColumn(
+                            label: Text(
+                              'Joueur',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Pts',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Aces',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Att',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Blcs',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Err',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'ErrS',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'ErrA',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'ErrR',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Bilan',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            numeric: true,
+                          ),
                         ],
                         rows: sortedPlayersList.map((pStats) {
                           final isPositiveBilan = pStats.netContribution >= 0;
                           return DataRow(
                             cells: [
-                              DataCell(Text(
-                                '${pStats.player.name} (${pStats.player.number})',
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              )),
+                              DataCell(
+                                Text(
+                                  '${pStats.player.name} (${pStats.player.number})',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
                               DataCell(Text('${pStats.totalPoints}')),
                               DataCell(Text('${pStats.aces}')),
                               DataCell(Text('${pStats.attacks}')),
@@ -366,7 +538,9 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
                                   '${isPositiveBilan ? "+" : ""}${pStats.netContribution}',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: isPositiveBilan ? Colors.green : Colors.red,
+                                    color: isPositiveBilan
+                                        ? Colors.green
+                                        : Colors.red,
                                   ),
                                 ),
                               ),
@@ -382,12 +556,43 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Légende des colonnes :', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF64748B))),
+                        Text(
+                          'Légende des colonnes :',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text('- Pts : Total points marqués (Aces + Attaques + Blocs)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                        Text('- Att / Blcs : Attaques gagnantes / Blocs gagnants', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                        Text('- Err / ErrS / ErrA / ErrR : Total fautes / Fautes service / Fautes attaque / Erreurs réception', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
-                        Text('- Bilan : Points marqués moins Fautes commises (Contribution nette)', style: TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                        Text(
+                          '- Pts : Total points marqués (Aces + Attaques + Blocs)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        Text(
+                          '- Att / Blcs : Attaques gagnantes / Blocs gagnants',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        Text(
+                          '- Err / ErrS / ErrA / ErrR : Total fautes / Fautes service / Fautes attaque / Erreurs réception',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        Text(
+                          '- Bilan : Points marqués moins Fautes commises (Contribution nette)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -406,7 +611,11 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
       children: [
         Text(
           value,
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color ?? const Color(0xFF0F172A)),
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: color ?? const Color(0xFF0F172A),
+          ),
         ),
         const SizedBox(height: 4),
         Text(
@@ -445,11 +654,19 @@ class _TeamStatsScreenState extends State<TeamStatsScreen> {
             children: [
               Text(
                 title,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF334155)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF334155),
+                ),
               ),
               Text(
                 '$count ($displayPercent%)',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
               ),
             ],
           ),
@@ -495,6 +712,7 @@ class _PlayerAggregatedStats {
   _PlayerAggregatedStats({required this.player});
 
   int get totalPoints => aces + attacks + blocks;
-  int get totalErrors => serveErrors + attackErrors + receptionErrors + otherErrors;
+  int get totalErrors =>
+      serveErrors + attackErrors + receptionErrors + otherErrors;
   int get netContribution => totalPoints - totalErrors;
 }

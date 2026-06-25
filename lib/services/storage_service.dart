@@ -66,7 +66,8 @@ class StorageService {
         for (var entity in entities) {
           if (entity is File) {
             final fileName = entity.path.split('/').last;
-            if (fileName.startsWith(_filePrefix) && fileName.endsWith(_fileExtension)) {
+            if (fileName.startsWith(_filePrefix) &&
+                fileName.endsWith(_fileExtension)) {
               try {
                 final jsonStr = await entity.readAsString();
                 final map = jsonDecode(jsonStr);

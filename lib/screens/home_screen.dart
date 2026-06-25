@@ -7,7 +7,7 @@ import 'stats_screen.dart';
 import 'teams_tab.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -37,8 +37,18 @@ class _HomeScreenState extends State<HomeScreen> {
   String _formatDate(DateTime date) {
     // Format: "25 juin 2026 à 12:34" in French
     final months = [
-      'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
-      'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      'janvier',
+      'février',
+      'mars',
+      'avril',
+      'mai',
+      'juin',
+      'juillet',
+      'août',
+      'septembre',
+      'octobre',
+      'novembre',
+      'décembre',
     ];
     final day = date.day;
     final month = months[date.month - 1];
@@ -54,7 +64,9 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Supprimer le match ?'),
-        content: Text('Voulez-vous vraiment supprimer définitivement le match "$matchName" ? Cette action est irréversible.'),
+        content: Text(
+          'Voulez-vous vraiment supprimer définitivement le match "$matchName" ? Cette action est irréversible.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -63,10 +75,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('SUPPRIMER', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'SUPPRIMER',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -107,15 +124,17 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.refresh),
               tooltip: 'Rafraîchir',
               onPressed: _loadMatches,
-            )
+            ),
         ],
       ),
       body: _currentIndex == 0
           ? (_isLoading
-              ? const Center(child: CircularProgressIndicator(color: Color(0xFFF59E0B)))
-              : _matches.isEmpty
-                  ? _buildEmptyState()
-                  : _buildMatchList())
+                ? const Center(
+                    child: CircularProgressIndicator(color: Color(0xFFF59E0B)),
+                  )
+                : _matches.isEmpty
+                ? _buildEmptyState()
+                : _buildMatchList())
           : const TeamsTab(),
       floatingActionButton: _currentIndex == 0
           ? FloatingActionButton.extended(
@@ -123,18 +142,25 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MatchSetupScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const MatchSetupScreen(),
+                  ),
                 );
                 if (result == true) {
                   _loadMatches();
                 }
               },
-              backgroundColor: const Color(0xFFF59E0B), // Volleyball Orange/Amber
+              backgroundColor: const Color(
+                0xFFF59E0B,
+              ), // Volleyball Orange/Amber
               foregroundColor: Colors.white,
               icon: const Icon(Icons.add, size: 24),
               label: const Text(
                 'NOUVEAU MATCH',
-                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
               ),
             )
           : null,
@@ -157,10 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.sports_volleyball),
             label: 'Matchs',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.group),
-            label: 'Collectifs',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Collectifs'),
         ],
       ),
     );
@@ -183,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.black.withOpacity(0.05),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
-                  )
+                  ),
                 ],
               ),
               child: const Icon(
@@ -205,10 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             const Text(
               'Commencez à suivre vos matchs et collecter des statistiques en créant votre premier match de volley-ball !',
-              style: TextStyle(
-                fontSize: 15,
-                color: Color(0xFF64748B),
-              ),
+              style: TextStyle(fontSize: 15, color: Color(0xFF64748B)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -216,7 +236,9 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 final result = await Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MatchSetupScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const MatchSetupScreen(),
+                  ),
                 );
                 if (result == true) {
                   _loadMatches();
@@ -230,8 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3B82F6),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 2,
               ),
             ),
@@ -253,7 +280,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMatchCard(VolleyballMatch match) {
-    final statusColor = match.isFinished ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
+    final statusColor = match.isFinished
+        ? const Color(0xFF10B981)
+        : const Color(0xFFF59E0B);
     final statusText = match.isFinished ? 'Terminé' : 'En cours';
 
     return Card(
@@ -268,14 +297,18 @@ class _HomeScreenState extends State<HomeScreen> {
             // Navigate to stats
             await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => StatsScreen(match: match)),
+              MaterialPageRoute(
+                builder: (context) => StatsScreen(match: match),
+              ),
             );
             _loadMatches(); // Refresh list in case stats screen triggered adjustments
           } else {
             // Resume match
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MatchScreen(match: match)),
+              MaterialPageRoute(
+                builder: (context) => MatchScreen(match: match),
+              ),
             );
             if (result == true) {
               _loadMatches();
@@ -303,7 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
@@ -322,10 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 6),
               Text(
                 _formatDate(match.date),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                ),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
               ),
               const Divider(height: 24, thickness: 1, color: Color(0xFFF1F5F9)),
               Row(
@@ -358,7 +391,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   // Score summary
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(12),
@@ -371,19 +407,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: match.setsWonUs >= match.setsWonThem ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                            color: match.setsWonUs >= match.setsWonThem
+                                ? const Color(0xFF2563EB)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                         const Text(
                           ' - ',
-                          style: TextStyle(fontSize: 16, color: Color(0xFF94A3B8)),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFF94A3B8),
+                          ),
                         ),
                         Text(
                           '${match.setsWonThem}',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: match.setsWonThem >= match.setsWonUs ? const Color(0xFFDC2626) : const Color(0xFF64748B),
+                            color: match.setsWonThem >= match.setsWonUs
+                                ? const Color(0xFFDC2626)
+                                : const Color(0xFF64748B),
                           ),
                         ),
                       ],
@@ -396,7 +439,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444)),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: Color(0xFFEF4444),
+                    ),
                     tooltip: 'Supprimer',
                     onPressed: () => _deleteMatch(match.id, match.name),
                   ),
@@ -405,7 +451,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => StatsScreen(match: match)),
+                        MaterialPageRoute(
+                          builder: (context) => StatsScreen(match: match),
+                        ),
                       );
                       _loadMatches();
                     },
@@ -422,25 +470,36 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (match.isFinished) {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => StatsScreen(match: match)),
+                          MaterialPageRoute(
+                            builder: (context) => StatsScreen(match: match),
+                          ),
                         );
                       } else {
                         final result = await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MatchScreen(match: match)),
+                          MaterialPageRoute(
+                            builder: (context) => MatchScreen(match: match),
+                          ),
                         );
                         if (result == true) {
                           _loadMatches();
                         }
                       }
                     },
-                    icon: Icon(match.isFinished ? Icons.visibility : Icons.play_arrow, size: 18),
+                    icon: Icon(
+                      match.isFinished ? Icons.visibility : Icons.play_arrow,
+                      size: 18,
+                    ),
                     label: Text(match.isFinished ? 'Voir' : 'Reprendre'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: match.isFinished ? const Color(0xFF64748B) : const Color(0xFF3B82F6),
+                      backgroundColor: match.isFinished
+                          ? const Color(0xFF64748B)
+                          : const Color(0xFF3B82F6),
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                     ),
                   ),

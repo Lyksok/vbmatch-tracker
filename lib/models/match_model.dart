@@ -1,18 +1,18 @@
-
 enum PointAction {
-  ace('Ace (Service Gagnant)', true),
-  attaque('Attaque Gagnante', true),
-  contre('Bloc Gagnant', true),
-  erreurAdverse('Erreur Adverse (Point Gagné)', true),
-  fauteService('Faute de Service (Point Perdu)', false),
-  fauteAttaque("Faute d'Attaque (Point Perdu)", false),
-  erreurReception('Erreur Réception/Défense (Point Perdu)', false),
-  fauteFiletAutre('Faute Filet / Autre (Point Perdu)', false),
-  pointAdversaire('Point Direct Adverse', false),
+  ace('Ace', true),
+  attaque('Attaque gagnante', true),
+  contre('Bloc gagnant', true),
+  erreurAdverse('Erreur adverse', true),
+  fauteService('Faute de service', false),
+  fauteAttaque('Faute d\'attaque', false),
+  erreurReception('Erreur réception', false),
+  fauteFiletAutre('Faute directe', false),
+  pointAdversaire('Point direct adverse', false),
   none('Ignoré', null);
 
   final String label;
-  final bool? isPositive; // true: we scored, false: opponent scored, null: ignore stats
+  final bool?
+  isPositive; // true: we scored, false: opponent scored, null: ignore stats
   const PointAction(this.label, this.isPositive);
 
   static PointAction fromString(String val) {
@@ -28,18 +28,10 @@ class Player {
   final String name;
   final int number;
 
-  Player({
-    required this.id,
-    required this.name,
-    required this.number,
-  });
+  Player({required this.id, required this.name, required this.number});
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'number': number,
-    };
+    return {'id': id, 'name': name, 'number': number};
   }
 
   factory Player.fromMap(Map<String, dynamic> map) {
@@ -57,7 +49,8 @@ class PointEvent {
   final String id;
   final String winningTeam; // 'us' or 'them'
   final PointAction action;
-  final String? playerId; // ID of the player, or null if team action or opponent error
+  final String?
+  playerId; // ID of the player, or null if team action or opponent error
 
   PointEvent({
     required this.id,
@@ -98,7 +91,7 @@ class VolleyballSet {
     this.scoreUs = 0,
     this.scoreThem = 0,
     this.isFinished = false,
-  }) : this.events = events ?? [];
+  }) : events = events ?? [];
 
   Map<String, dynamic> toMap() {
     return {
@@ -163,8 +156,8 @@ class VolleyballMatch {
     this.isFinished = false,
     DateTime? date,
     this.ignoreStats = false,
-  })  : this.sets = sets ?? [VolleyballSet(setNumber: 1)],
-        this.date = date ?? DateTime.now();
+  }) : sets = sets ?? [VolleyballSet(setNumber: 1)],
+       date = date ?? DateTime.now();
 
   Map<String, dynamic> toMap() {
     return {
@@ -187,7 +180,9 @@ class VolleyballMatch {
       name: map['name'] ?? '',
       teamName: map['teamName'] ?? 'Mon Équipe',
       teamId: map['teamId'],
-      players: (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ?? [],
+      players:
+          (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ??
+          [],
       winningSetsNeeded: map['winningSetsNeeded'] ?? 3,
       isFinished: map['isFinished'] ?? false,
       date: DateTime.parse(map['date'] ?? DateTime.now().toIso8601String()),
@@ -251,9 +246,11 @@ class VolleyballMatch {
 
     // Check if the current set is finished
     int targetPoints = isDecidingSet(activeSet.setNumber) ? 15 : 25;
-    if (activeSet.scoreUs >= targetPoints && activeSet.scoreUs >= activeSet.scoreThem + 2) {
+    if (activeSet.scoreUs >= targetPoints &&
+        activeSet.scoreUs >= activeSet.scoreThem + 2) {
       activeSet.isFinished = true;
-    } else if (activeSet.scoreThem >= targetPoints && activeSet.scoreThem >= activeSet.scoreUs + 2) {
+    } else if (activeSet.scoreThem >= targetPoints &&
+        activeSet.scoreThem >= activeSet.scoreUs + 2) {
       activeSet.isFinished = true;
     }
 
@@ -276,7 +273,7 @@ class VolleyballMatch {
       sets.removeLast(); // Remove empty set
       activeSet = currentSet;
       activeSet.isFinished = false; // Reopen previous set
-      isFinished = false;           // Reopen match
+      isFinished = false; // Reopen match
     }
 
     if (activeSet.events.isNotEmpty) {
@@ -331,7 +328,9 @@ class Team {
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       type: map['type'] ?? '6x6',
-      players: (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ?? [],
+      players:
+          (map['players'] as List?)?.map((p) => Player.fromMap(p)).toList() ??
+          [],
     );
   }
 }
